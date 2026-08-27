@@ -6,7 +6,7 @@
 
 **Architecture:** `SKILL.md`は発火条件と最小workflowだけを保持し、設定境界を`config-architecture.md`、runの状態・再試行を`run-lifecycle.md`へ分離する。scriptとassetは作らず、対象repositoryに存在するtoolだけを利用する。
 
-**Tech Stack:** Markdown、YAML、Python 3.12 `unittest`、Codex subagent pressure tests
+**Tech Stack:** Markdown、YAML、uv、Python 3.12 `unittest`、Codex subagent pressure tests
 
 ### Task 1: Skill behavior baseline
 
@@ -19,7 +19,23 @@
 4. skillが防ぐべき非自明な失敗だけを一覧化する。
 5. evaluation文書だけをcommitする。
 
-### Task 2: Package contract RED
+### Task 2: uv-managed repository tooling
+
+**Files:**
+- Create: `pyproject.toml`
+- Create: `uv.lock`
+- Modify: `tests/test_skill_package.py`
+- Modify: `.github/workflows/validate.yml`
+- Modify: `README.md`
+
+1. repository tooling testへ、uv project metadata、lockfile、CIのuv setup、READMEの`uv run` commandを検査するtestを追加する。
+2. `uv run python -m unittest -v tests.test_skill_package.RepositoryToolingTest`を実行し、metadata未実装を理由にFAILすることを確認する。
+3. package化しない最小の`pyproject.toml`を作り、`uv lock`でlockfileを生成する。
+4. CIへuvをsetupし、package testを`uv run python -m unittest`で実行する。
+5. READMEのPython development commandを`uv run`へ統一する。
+6. repository tooling testと既存testをGREENにし、uv setupをcommitする。
+
+### Task 3: Package contract RED
 
 **Files:**
 - Modify: `tests/test_skill_package.py`
@@ -31,11 +47,11 @@
    - 個人名、絶対path、既知のproject名、特定toolの必須表現がない。
    - gradient accumulation、effective batch、一般的な比較論がない。
    - config ownership、experiment非継承、artifact evidence、partial/verified、retry lineageを含む。
-2. `python3 -m unittest -v tests.test_skill_package.ManagingExperimentsSkillPackageTest`を実行する。
+2. `uv run python -m unittest -v tests.test_skill_package.ManagingExperimentsSkillPackageTest`を実行する。
 3. skill directoryが存在しないことを理由にFAILすることを確認する。
 4. testだけをcommitする。
 
-### Task 3: Skill package GREEN
+### Task 4: Skill package GREEN
 
 **Files:**
 - Create: `skills/managing-experiments/SKILL.md`
@@ -52,7 +68,7 @@
 7. package testを再実行しGREENを確認する。
 8. skill packageをcommitする。
 
-### Task 4: Skill pressure GREEN and REFACTOR
+### Task 5: Skill pressure GREEN and REFACTOR
 
 **Files:**
 - Modify: `skills/managing-experiments/SKILL.md`
@@ -66,14 +82,14 @@
 4. 同じscenarioを再実行し、negative triggerを含めて再検証する。
 5. evaluationとrefactorをcommitする。
 
-### Task 5: Distribution and verification
+### Task 6: Distribution and verification
 
 **Files:**
 - Modify: `README.md`
 
 1. Skills一覧とinstall例へ`managing-experiments`を追加する。
-2. `python3 -m unittest discover -s tests -v`を実行し、全testがPASSすることを確認する。
-3. `python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/managing-experiments`を実行する。
+2. `uv run python -m unittest discover -s tests -v`を実行し、全testがPASSすることを確認する。
+3. `uv run python ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/managing-experiments`を実行する。
 4. 一時`CODEX_HOME`へGitHub path相当のskill directoryをcopyし、必須4ファイルだけで利用できることを確認する。
 5. `rg`で個人情報、project識別子、一般論、placeholderの残存がないことを確認する。
 6. `git diff --check`とbranch全体のdiffを確認する。
