@@ -195,19 +195,6 @@ class SkillPackageTest(unittest.TestCase):
 class ManagingExperimentsSkillPackageTest(unittest.TestCase):
     """配布可能な実験管理skillのpackage契約を検証する。"""
 
-    def assertParagraphContains(
-        self, body: str, *patterns: str, message: str
-    ) -> None:
-        """同じ短い段落に契約を表す語が揃っていることを検証する。"""
-        paragraphs = re.split(r"\n\s*\n", body)
-        self.assertTrue(
-            any(
-                all(re.search(pattern, paragraph, re.IGNORECASE) for pattern in patterns)
-                for paragraph in paragraphs
-            ),
-            message,
-        )
-
     def test_metadata_describes_only_generic_experiment_triggers(self) -> None:
         self.assertTrue(
             MANAGING_EXPERIMENTS_SKILL_ROOT.is_dir(),
@@ -301,13 +288,6 @@ class ManagingExperimentsSkillPackageTest(unittest.TestCase):
             "timeseries-det",
             "tailefcc",
         )
-        mandatory_tool_pattern = re.compile(
-            r"(?:\b(?:must|always)\s+(?:configure|log|run|schedule|track|train|use)"
-            r"\b[^\n.]{0,60}\b(?:hydra|pueue|wandb|w&b|lightning)\b|"
-            r"\b(?:hydra|pueue|wandb|w&b|lightning)\b[^\n.]{0,60}"
-            r"\b(?:is\s+always\s+required|must(?:\s+always)?\s+be\s+used)\b)",
-            re.IGNORECASE,
-        )
 
         package_text_parts: list[str] = []
 
@@ -318,7 +298,6 @@ class ManagingExperimentsSkillPackageTest(unittest.TestCase):
             for token in forbidden_identities:
                 with self.subTest(path=path, identity=token):
                     self.assertNotIn(token, lowered)
-            self.assertNotRegex(text, mandatory_tool_pattern, str(path))
 
         package_text = "\n\n".join(package_text_parts)
         self.assertIn(
@@ -326,6 +305,16 @@ class ManagingExperimentsSkillPackageTest(unittest.TestCase):
             "they are already present in the repository.",
             package_text,
         )
+        for tool in ("Hydra", "pueue", "W&B", "Lightning"):
+            with self.subTest(tool=tool):
+                occurrences = re.findall(
+                    rf"(?<!\w){re.escape(tool)}(?!\w)",
+                    package_text,
+                    re.IGNORECASE,
+                )
+                self.assertEqual(
+                    len(occurrences), 1, f"{tool}はcanonical sentence内の1回だけです"
+                )
 
     def test_package_excludes_user_requested_topics(self) -> None:
         self.assertTrue(
@@ -406,16 +395,10 @@ class ManagingExperimentsSkillPackageTest(unittest.TestCase):
         )
         body = reference_file.read_text(encoding="utf-8")
 
-        self.assertParagraphContains(
+        self.assertIn(
+            "The existence of a YAML file, job record, finished process, or "
+            "checkpoint does not by itself prove completion or verified status.",
             body,
-            r"\byaml\b",
-            r"\bjob\b",
-            r"\bprocess\b",
-            r"\bcheckpoint\b",
-            r"\b(?:existence|presence|alone|by itself)\b",
-            r"\b(?:does not|do not|is not|are not|never|insufficient)\b",
-            r"\b(?:complete|completion|verified)\b",
-            message="YAML・job・process・checkpointの存在だけでは完了にしない契約が必要です",
         )
         self.assertIn(
             "Assign queued, running, failed, partial, verified, or unknown only from "
