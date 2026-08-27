@@ -300,21 +300,20 @@ class ManagingExperimentsSkillPackageTest(unittest.TestCase):
                     self.assertNotIn(token, lowered)
 
         package_text = "\n\n".join(package_text_parts)
-        self.assertIn(
+        canonical_tool_contract = (
             "Use Hydra, pueue, W&B, Lightning, or equivalent tools only when "
-            "they are already present in the repository.",
-            package_text,
+            "they are already present in the repository."
         )
-        for tool in ("Hydra", "pueue", "W&B", "Lightning"):
-            with self.subTest(tool=tool):
-                occurrences = re.findall(
-                    rf"(?<!\w){re.escape(tool)}(?!\w)",
-                    package_text,
-                    re.IGNORECASE,
-                )
-                self.assertEqual(
-                    len(occurrences), 1, f"{tool}はcanonical sentence内の1回だけです"
-                )
+        self.assertEqual(package_text.count(canonical_tool_contract), 1)
+
+        remaining_text = package_text.replace(canonical_tool_contract, "", 1)
+        self.assertNotRegex(
+            remaining_text,
+            re.compile(
+                r"(?<!\w)(?:hydra|pueue|w&b|wandb|lightning)(?!\w)",
+                re.IGNORECASE,
+            ),
+        )
 
     def test_package_excludes_user_requested_topics(self) -> None:
         self.assertTrue(
