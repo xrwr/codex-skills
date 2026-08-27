@@ -31,8 +31,8 @@ Restart Codex after installation. For reproducible machine setup, keep the repos
 ## Development
 
 ```bash
-python -m unittest -v tests/test_skill_package.py
-python ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py \
+uv run python -m unittest -v tests/test_skill_package.py
+uv run python ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py \
   skills/building-viewers
 ```
 

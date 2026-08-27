@@ -4,12 +4,68 @@ import re
 import subprocess
 import sys
 import tempfile
+import tomllib
 import unittest
 from pathlib import Path
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 SKILL_ROOT = REPOSITORY_ROOT / "skills" / "building-viewers"
+
+
+class RepositoryToolingTest(unittest.TestCase):
+    """リポジトリ自身のPython検証環境がuv管理であることを検証する。"""
+
+    def test_repository_is_a_uv_managed_non_package_project(self) -> None:
+        pyproject_file = REPOSITORY_ROOT / "pyproject.toml"
+        lock_file = REPOSITORY_ROOT / "uv.lock"
+
+        self.assertTrue(pyproject_file.is_file(), "pyproject.tomlが必要です")
+        self.assertTrue(lock_file.is_file(), "uv.lockが必要です")
+
+        config = tomllib.loads(pyproject_file.read_text(encoding="utf-8"))
+        self.assertEqual(
+            config["project"],
+            {
+                "name": "codex-skills",
+                "version": "0.0.0",
+                "requires-python": ">=3.12",
+                "dependencies": [],
+            },
+        )
+        self.assertEqual(config["tool"]["uv"], {"package": False})
+        self.assertNotIn("build-system", config)
+
+    def test_package_ci_uses_uv_with_the_frozen_lockfile(self) -> None:
+        workflow = (REPOSITORY_ROOT / ".github" / "workflows" / "validate.yml").read_text(
+            encoding="utf-8"
+        )
+        package_job = workflow.split("  package:", maxsplit=1)[1].split(
+            "  starter:", maxsplit=1
+        )[0]
+
+        self.assertIn(
+            "astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0",
+            package_job,
+        )
+        self.assertIn(
+            "uv run --frozen python -m unittest -v tests/test_skill_package.py",
+            package_job,
+        )
+
+    def test_development_commands_run_python_through_uv(self) -> None:
+        readme = (REPOSITORY_ROOT / "README.md").read_text(encoding="utf-8")
+        development = readme.split("## Development", maxsplit=1)[1].split(
+            "## License", maxsplit=1
+        )[0]
+
+        self.assertIn(
+            "uv run python -m unittest -v tests/test_skill_package.py", development
+        )
+        self.assertIn(
+            "uv run python ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py",
+            development,
+        )
 
 
 class SkillPackageTest(unittest.TestCase):
