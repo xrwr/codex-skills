@@ -1,0 +1,7 @@
+interface:
+  display_name: "Experiment Manager"
+  short_description: "Manage reproducible experiments and runs"
+  default_prompt: "Use $managing-experiments to plan or assess this repository experiment and run."
+
+policy:
+  allow_implicit_invocation: true
