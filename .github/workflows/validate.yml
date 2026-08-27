@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: "3.12"
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
-      - run: uv run --frozen python -m unittest -v tests/test_skill_package.py
+      - run: uv run --locked python -m unittest -v tests/test_skill_package.py
 
   starter:
     runs-on: ubuntu-latest

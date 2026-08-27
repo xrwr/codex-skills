@@ -24,19 +24,15 @@ class RepositoryToolingTest(unittest.TestCase):
         self.assertTrue(lock_file.is_file(), "uv.lockが必要です")
 
         config = tomllib.loads(pyproject_file.read_text(encoding="utf-8"))
-        self.assertEqual(
-            config["project"],
-            {
-                "name": "codex-skills",
-                "version": "0.0.0",
-                "requires-python": ">=3.12",
-                "dependencies": [],
-            },
-        )
-        self.assertEqual(config["tool"]["uv"], {"package": False})
+        project = config["project"]
+        self.assertEqual(project["name"], "codex-skills")
+        self.assertEqual(project["version"], "0.0.0")
+        self.assertEqual(project["requires-python"], ">=3.12")
+        self.assertEqual(project["dependencies"], [])
+        self.assertIs(config["tool"]["uv"]["package"], False)
         self.assertNotIn("build-system", config)
 
-    def test_package_ci_uses_uv_with_the_frozen_lockfile(self) -> None:
+    def test_package_ci_uses_uv_with_the_locked_lockfile(self) -> None:
         workflow = (REPOSITORY_ROOT / ".github" / "workflows" / "validate.yml").read_text(
             encoding="utf-8"
         )
@@ -44,13 +40,21 @@ class RepositoryToolingTest(unittest.TestCase):
             "  starter:", maxsplit=1
         )[0]
 
-        self.assertIn(
-            "astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0",
+        self.assertRegex(
             package_job,
+            re.compile(
+                r"^      - uses: astral-sh/setup-uv@"
+                r"c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9\.0\.0$",
+                re.MULTILINE,
+            ),
         )
-        self.assertIn(
-            "uv run --frozen python -m unittest -v tests/test_skill_package.py",
+        self.assertRegex(
             package_job,
+            re.compile(
+                r"^      - run: uv run --locked python -m unittest -v "
+                r"tests/test_skill_package\.py$",
+                re.MULTILINE,
+            ),
         )
 
     def test_development_commands_run_python_through_uv(self) -> None:
