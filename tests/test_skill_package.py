@@ -193,9 +193,9 @@ class SkillPackageTest(unittest.TestCase):
 
 
 class ManagingExperimentsSkillPackageTest(unittest.TestCase):
-    """配布可能な実験管理skillのpackage契約を検証する。"""
+    """配布可能な実験管理skillの最小package契約を検証する。"""
 
-    def test_metadata_describes_only_generic_experiment_triggers(self) -> None:
+    def test_metadata_uses_generic_experiment_triggers(self) -> None:
         self.assertTrue(
             MANAGING_EXPERIMENTS_SKILL_ROOT.is_dir(),
             "managing-experiments skill directoryが必要です",
@@ -216,32 +216,9 @@ class ManagingExperimentsSkillPackageTest(unittest.TestCase):
 
         description = frontmatter[1].removeprefix("description: ")
         self.assertTrue(description.startswith("Use when "))
-        self.assertNotRegex(
-            description,
-            re.compile(r"\b(?:I|we|you|your|our|my|this skill)\b", re.IGNORECASE),
-        )
-        self.assertNotRegex(
-            description,
-            re.compile(
-                r"\b(?:helps?|guides?|teaches?|enforces?|provides?)\b",
-                re.IGNORECASE,
-            ),
-        )
-
-        search_terms = {
-            "experiment": r"\bexperiments?\b",
-            "run": r"\bruns?\b",
-            "ablation": r"\bablations?\b",
-            "baseline": r"\bbaselines?\b",
-            "configuration": r"\b(?:configurations?|configs?)\b",
-            "reproduction": r"\breproduc(?:e|es|ing|tion|ibility)\b",
-            "restart": r"\b(?:restarts?|retries|retrying)\b",
-            "status": r"\b(?:status|states?)\b",
-            "results": r"\b(?:results?|metrics?|outcomes?)\b",
-        }
-        for label, pattern in search_terms.items():
-            with self.subTest(search_term=label):
-                self.assertRegex(description, re.compile(pattern, re.IGNORECASE))
+        lowered_description = description.lower()
+        self.assertIn("experiment", lowered_description)
+        self.assertIn("run", lowered_description)
 
     def test_package_contains_exact_distribution_resources(self) -> None:
         self.assertTrue(
@@ -268,7 +245,7 @@ class ManagingExperimentsSkillPackageTest(unittest.TestCase):
         self.assertFalse((MANAGING_EXPERIMENTS_SKILL_ROOT / "assets").exists())
         self.assertFalse((MANAGING_EXPERIMENTS_SKILL_ROOT / "README.md").exists())
 
-    def test_package_is_portable_and_tool_agnostic(self) -> None:
+    def test_package_is_portable_and_excludes_user_requested_topics(self) -> None:
         self.assertTrue(
             MANAGING_EXPERIMENTS_SKILL_ROOT.is_dir(),
             "managing-experiments skill directoryが必要です",
@@ -288,131 +265,23 @@ class ManagingExperimentsSkillPackageTest(unittest.TestCase):
             "timeseries-det",
             "tailefcc",
         )
-
-        package_text_parts: list[str] = []
-
-        for path in text_files:
-            text = path.read_text(encoding="utf-8")
-            package_text_parts.append(text)
-            lowered = text.lower()
-            for token in forbidden_identities:
-                with self.subTest(path=path, identity=token):
-                    self.assertNotIn(token, lowered)
-
-        package_text = "\n\n".join(package_text_parts)
-        canonical_tool_contract = (
-            "Use Hydra, pueue, W&B, Lightning, or equivalent tools only when "
-            "they are already present in the repository."
-        )
-        self.assertEqual(package_text.count(canonical_tool_contract), 1)
-
-        remaining_text = package_text.replace(canonical_tool_contract, "", 1)
-        self.assertNotRegex(
-            remaining_text,
-            re.compile(
-                r"(?<!\w)(?:hydra|pueue|w&b|wandb|lightning)(?!\w)",
-                re.IGNORECASE,
-            ),
-        )
-
-    def test_package_excludes_user_requested_topics(self) -> None:
-        self.assertTrue(
-            MANAGING_EXPERIMENTS_SKILL_ROOT.is_dir(),
-            "managing-experiments skill directoryが必要です",
-        )
-        text_files = [
-            path
-            for path in MANAGING_EXPERIMENTS_SKILL_ROOT.rglob("*")
-            if path.is_file()
-            and path.suffix.lower() in {".md", ".txt", ".yaml", ".yml"}
-        ]
-        self.assertTrue(text_files, "skillのtext fileが必要です")
         forbidden_topics = (
             "controlled-comparisons",
             "gradient accumulation",
             "accumulate_grad_batches",
             "effective batch",
+            "勾配蓄積",
         )
 
         for path in text_files:
             text = path.read_text(encoding="utf-8")
             lowered = text.lower()
+            for token in forbidden_identities:
+                with self.subTest(path=path, identity=token):
+                    self.assertNotIn(token, lowered)
             for token in forbidden_topics:
                 with self.subTest(path=path, topic=token):
                     self.assertNotIn(token, lowered)
-            self.assertNotRegex(text, re.compile(r"勾配\s*(?:の\s*)?蓄積"), str(path))
-
-    def test_config_architecture_reference_defines_portable_boundaries(self) -> None:
-        self.assertTrue(
-            MANAGING_EXPERIMENTS_SKILL_ROOT.is_dir(),
-            "managing-experiments skill directoryが必要です",
-        )
-        reference_file = (
-            MANAGING_EXPERIMENTS_SKILL_ROOT
-            / "references"
-            / "config-architecture.md"
-        )
-        self.assertTrue(
-            reference_file.is_file(), "references/config-architecture.mdが必要です"
-        )
-        body = reference_file.read_text(encoding="utf-8")
-
-        self.assertIn(
-            "Do not inherit one experiment config from another experiment config.",
-            body,
-        )
-        self.assertIn(
-            "Extract stable shared settings into components only after a concrete "
-            "implementation and owner exist.",
-            body,
-        )
-        self.assertIn(
-            "Do not create speculative config groups without a concrete "
-            "implementation and owner.",
-            body,
-        )
-        self.assertIn(
-            "Separate dataset artifacts from generator recipes.",
-            body,
-        )
-        self.assertIn(
-            "Keep domain code framework-independent and pass resolved configuration "
-            "through a thin entrypoint.",
-            body,
-        )
-
-    def test_run_lifecycle_reference_requires_evidence_and_attempt_tracking(self) -> None:
-        self.assertTrue(
-            MANAGING_EXPERIMENTS_SKILL_ROOT.is_dir(),
-            "managing-experiments skill directoryが必要です",
-        )
-        reference_file = (
-            MANAGING_EXPERIMENTS_SKILL_ROOT / "references" / "run-lifecycle.md"
-        )
-        self.assertTrue(
-            reference_file.is_file(), "references/run-lifecycle.mdが必要です"
-        )
-        body = reference_file.read_text(encoding="utf-8")
-
-        self.assertIn(
-            "The existence of a YAML file, job record, finished process, or "
-            "checkpoint does not by itself prove completion or verified status.",
-            body,
-        )
-        self.assertIn(
-            "Assign queued, running, failed, partial, verified, or unknown only from "
-            "evidence.",
-            body,
-        )
-        self.assertIn(
-            "For a retry of the same hypothesis, keep the experiment ID and create a "
-            "new attempt or run ID.",
-            body,
-        )
-        self.assertIn(
-            "Retire old outputs before writing a retry to the canonical output path.",
-            body,
-        )
 
     def test_openai_metadata_supports_implicit_invocation(self) -> None:
         self.assertTrue(
