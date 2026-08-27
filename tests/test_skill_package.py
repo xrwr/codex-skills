@@ -11,6 +11,7 @@ from pathlib import Path
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 SKILL_ROOT = REPOSITORY_ROOT / "skills" / "building-viewers"
+MANAGING_EXPERIMENTS_SKILL_ROOT = REPOSITORY_ROOT / "skills" / "managing-experiments"
 
 
 class RepositoryToolingTest(unittest.TestCase):
@@ -189,6 +190,281 @@ class SkillPackageTest(unittest.TestCase):
             self.assertNotEqual(second.returncode, 0)
             self.assertEqual(marker.read_text(encoding="utf-8"), original)
             self.assertRegex(second.stderr, re.compile(r"存在|exists", re.IGNORECASE))
+
+
+class ManagingExperimentsSkillPackageTest(unittest.TestCase):
+    """配布可能な実験管理skillのpackage契約を検証する。"""
+
+    def assertParagraphContains(
+        self, body: str, *patterns: str, message: str
+    ) -> None:
+        """同じ短い段落に契約を表す語が揃っていることを検証する。"""
+        paragraphs = re.split(r"\n\s*\n", body)
+        self.assertTrue(
+            any(
+                all(re.search(pattern, paragraph, re.IGNORECASE) for pattern in patterns)
+                for paragraph in paragraphs
+            ),
+            message,
+        )
+
+    def test_metadata_describes_only_generic_experiment_triggers(self) -> None:
+        self.assertTrue(
+            MANAGING_EXPERIMENTS_SKILL_ROOT.is_dir(),
+            "managing-experiments skill directoryが必要です",
+        )
+        skill_file = MANAGING_EXPERIMENTS_SKILL_ROOT / "SKILL.md"
+        self.assertTrue(skill_file.is_file(), "SKILL.mdが必要です")
+        body = skill_file.read_text(encoding="utf-8")
+        frontmatter_match = re.match(
+            r"\A---\n(?P<frontmatter>.*?)\n---(?:\n|\Z)", body, re.DOTALL
+        )
+
+        self.assertIsNotNone(frontmatter_match, "YAML frontmatterが必要です")
+        assert frontmatter_match is not None
+        frontmatter = frontmatter_match.group("frontmatter").splitlines()
+        self.assertEqual(len(frontmatter), 2)
+        self.assertEqual(frontmatter[0], "name: managing-experiments")
+        self.assertTrue(frontmatter[1].startswith("description: "))
+
+        description = frontmatter[1].removeprefix("description: ")
+        self.assertTrue(description.startswith("Use when "))
+        self.assertNotRegex(
+            description,
+            re.compile(r"\b(?:I|we|you|your|our|my|this skill)\b", re.IGNORECASE),
+        )
+        self.assertNotRegex(
+            description,
+            re.compile(
+                r"\b(?:helps?|guides?|teaches?|enforces?|provides?)\b",
+                re.IGNORECASE,
+            ),
+        )
+
+        search_terms = {
+            "experiment": r"\bexperiments?\b",
+            "run": r"\bruns?\b",
+            "ablation": r"\bablations?\b",
+            "baseline": r"\bbaselines?\b",
+            "configuration": r"\b(?:configurations?|configs?)\b",
+            "reproduction": r"\breproduc(?:e|es|ing|tion|ibility)\b",
+            "restart": r"\b(?:restarts?|retries|retrying)\b",
+            "status": r"\b(?:status|states?)\b",
+            "results": r"\b(?:results?|metrics?|outcomes?)\b",
+        }
+        for label, pattern in search_terms.items():
+            with self.subTest(search_term=label):
+                self.assertRegex(description, re.compile(pattern, re.IGNORECASE))
+
+    def test_package_contains_exact_distribution_resources(self) -> None:
+        self.assertTrue(
+            MANAGING_EXPERIMENTS_SKILL_ROOT.is_dir(),
+            "managing-experiments skill directoryが必要です",
+        )
+        expected = {
+            "SKILL.md",
+            "agents/openai.yaml",
+            "references/config-architecture.md",
+            "references/run-lifecycle.md",
+        }
+        actual = {
+            path.relative_to(MANAGING_EXPERIMENTS_SKILL_ROOT).as_posix()
+            for path in MANAGING_EXPERIMENTS_SKILL_ROOT.rglob("*")
+            if path.is_file()
+        }
+
+        self.assertEqual(actual, expected)
+        self.assertFalse(
+            (MANAGING_EXPERIMENTS_SKILL_ROOT / "controlled-comparisons.md").exists()
+        )
+        self.assertFalse((MANAGING_EXPERIMENTS_SKILL_ROOT / "scripts").exists())
+        self.assertFalse((MANAGING_EXPERIMENTS_SKILL_ROOT / "assets").exists())
+        self.assertFalse((MANAGING_EXPERIMENTS_SKILL_ROOT / "README.md").exists())
+
+    def test_package_is_portable_and_tool_agnostic(self) -> None:
+        self.assertTrue(
+            MANAGING_EXPERIMENTS_SKILL_ROOT.is_dir(),
+            "managing-experiments skill directoryが必要です",
+        )
+        text_files = [
+            path
+            for path in MANAGING_EXPERIMENTS_SKILL_ROOT.rglob("*")
+            if path.is_file()
+            and path.suffix.lower() in {".md", ".txt", ".yaml", ".yml"}
+        ]
+        self.assertTrue(text_files, "skillのtext fileが必要です")
+        forbidden_identities = (
+            "/home/",
+            "rheni",
+            "rsna",
+            "biohub",
+            "timeseries-det",
+            "tailefcc",
+        )
+        mandatory_tool_pattern = re.compile(
+            r"(?:\b(?:must|always)\s+(?:use|run)\b[^\n.]{0,60}"
+            r"\b(?:hydra|pueue|wandb|w&b|lightning)\b|"
+            r"\brequired\s+to\s+(?:use|run)\b[^\n.]{0,60}"
+            r"\b(?:hydra|pueue|wandb|w&b|lightning)\b|"
+            r"\b(?:hydra|pueue|wandb|w&b|lightning)\b[^\n.]{0,60}"
+            r"\b(?:must\s+be\s+used|is\s+required|is\s+mandatory)\b|"
+            r"\buse\s+of\s+(?:hydra|pueue|wandb|w&b|lightning)\b"
+            r"[^\n.]{0,40}\b(?:is\s+required|is\s+mandatory)\b|"
+            r"(?:hydra|pueue|wandb|w&b|lightning)[^\n。]{0,40}"
+            r"(?:を必ず使|使用必須|必須(?:である|です|とする)|に限定))",
+            re.IGNORECASE,
+        )
+
+        for path in text_files:
+            text = path.read_text(encoding="utf-8")
+            lowered = text.lower()
+            for token in forbidden_identities:
+                with self.subTest(path=path, identity=token):
+                    self.assertNotIn(token, lowered)
+            self.assertNotRegex(text, mandatory_tool_pattern, str(path))
+
+    def test_package_excludes_user_requested_topics(self) -> None:
+        self.assertTrue(
+            MANAGING_EXPERIMENTS_SKILL_ROOT.is_dir(),
+            "managing-experiments skill directoryが必要です",
+        )
+        text_files = [
+            path
+            for path in MANAGING_EXPERIMENTS_SKILL_ROOT.rglob("*")
+            if path.is_file()
+            and path.suffix.lower() in {".md", ".txt", ".yaml", ".yml"}
+        ]
+        self.assertTrue(text_files, "skillのtext fileが必要です")
+        forbidden_topics = (
+            "controlled-comparisons",
+            "gradient accumulation",
+            "accumulate_grad_batches",
+            "effective batch",
+        )
+
+        for path in text_files:
+            text = path.read_text(encoding="utf-8")
+            lowered = text.lower()
+            for token in forbidden_topics:
+                with self.subTest(path=path, topic=token):
+                    self.assertNotIn(token, lowered)
+            self.assertNotRegex(text, re.compile(r"勾配\s*(?:の\s*)?蓄積"), str(path))
+
+    def test_config_architecture_reference_defines_portable_boundaries(self) -> None:
+        self.assertTrue(
+            MANAGING_EXPERIMENTS_SKILL_ROOT.is_dir(),
+            "managing-experiments skill directoryが必要です",
+        )
+        reference_file = (
+            MANAGING_EXPERIMENTS_SKILL_ROOT
+            / "references"
+            / "config-architecture.md"
+        )
+        self.assertTrue(
+            reference_file.is_file(), "references/config-architecture.mdが必要です"
+        )
+        body = reference_file.read_text(encoding="utf-8")
+
+        self.assertParagraphContains(
+            body,
+            r"\bexperiment (?:configs?|configurations?)\b",
+            r"\binherit\w*\b",
+            r"\b(?:avoid|do not|must not|never|prohibit\w*)\b",
+            message="experiment config同士を継承させない契約が必要です",
+        )
+        self.assertParagraphContains(
+            body,
+            r"\b(?:extract|promote|move)\w*\b",
+            r"\b(?:stable|shared)\b",
+            r"\bcomponents?\b",
+            message="stable/shared componentを抽出する契約が必要です",
+        )
+        self.assertParagraphContains(
+            body,
+            r"\bspeculative\w*\b",
+            r"\b(?:config(?:uration)? groups?|groups?)\b",
+            r"\b(?:without|unless|lack(?:s|ing)?)\b",
+            r"\b(?:implementation|owner)\b",
+            r"\b(?:avoid|do not|must not|never|prohibit\w*)\b",
+            message="実装・ownerのないspeculative groupを禁止する契約が必要です",
+        )
+        self.assertParagraphContains(
+            body,
+            r"\bdataset artifacts?\b",
+            r"\bgenerator recipes?\b",
+            r"\b(?:separate|distinguish|differentiate)\w*\b",
+            message="dataset artifactとgenerator recipeを分離する契約が必要です",
+        )
+        self.assertRegex(body, re.compile(r"\bframework[- ]independent\b", re.I))
+        self.assertRegex(body, re.compile(r"\bdomain code\b", re.I))
+        self.assertRegex(body, re.compile(r"\bthin entrypoint\b", re.I))
+
+    def test_run_lifecycle_reference_requires_evidence_and_attempt_tracking(self) -> None:
+        self.assertTrue(
+            MANAGING_EXPERIMENTS_SKILL_ROOT.is_dir(),
+            "managing-experiments skill directoryが必要です",
+        )
+        reference_file = (
+            MANAGING_EXPERIMENTS_SKILL_ROOT / "references" / "run-lifecycle.md"
+        )
+        self.assertTrue(
+            reference_file.is_file(), "references/run-lifecycle.mdが必要です"
+        )
+        body = reference_file.read_text(encoding="utf-8")
+
+        self.assertParagraphContains(
+            body,
+            r"\byaml\b",
+            r"\bjob\b",
+            r"\bprocess\b",
+            r"\bcheckpoint\b",
+            r"\b(?:existence|presence|alone|by itself)\b",
+            r"\b(?:does not|do not|is not|are not|never|insufficient)\b",
+            r"\b(?:complete|completion|verified)\b",
+            message="YAML・job・process・checkpointの存在だけでは完了にしない契約が必要です",
+        )
+        for status in ("queued", "running", "failed", "partial", "verified", "unknown"):
+            with self.subTest(run_status=status):
+                self.assertRegex(body, re.compile(rf"\b{status}\b", re.IGNORECASE))
+        self.assertRegex(body, re.compile(r"\bevidence\b", re.IGNORECASE))
+        self.assertParagraphContains(
+            body,
+            r"\bexperiment identity\b",
+            r"\b(?:attempts?|runs?)\b",
+            r"\b(?:separate|distinguish)\w*\b",
+            message="experiment identityとattempt/runを分離する契約が必要です",
+        )
+        self.assertParagraphContains(
+            body,
+            r"\bsame hypothesis\b",
+            r"\bretr(?:y|ies|ied|ying)\b",
+            r"\bexperiment (?:id|identity)\b",
+            r"\b(?:retain|preserve|keep|reuse)\w*\b",
+            message="同一仮説のretryでexperiment IDを維持する契約が必要です",
+        )
+        self.assertRegex(
+            body,
+            re.compile(
+                r"\b(?:retire|archive|supersede|invalidate)\w*\b[^.\n]{0,100}"
+                r"\b(?:old|previous|prior) outputs?\b|"
+                r"\b(?:old|previous|prior) outputs?\b[^.\n]{0,100}"
+                r"\b(?:retire|archive|supersede|invalidate)\w*\b",
+                re.IGNORECASE,
+            ),
+        )
+
+    def test_openai_metadata_supports_implicit_invocation(self) -> None:
+        self.assertTrue(
+            MANAGING_EXPERIMENTS_SKILL_ROOT.is_dir(),
+            "managing-experiments skill directoryが必要です",
+        )
+        metadata_file = MANAGING_EXPERIMENTS_SKILL_ROOT / "agents" / "openai.yaml"
+        self.assertTrue(metadata_file.is_file(), "agents/openai.yamlが必要です")
+        body = metadata_file.read_text(encoding="utf-8")
+
+        self.assertIn('display_name: "Experiment Manager"', body)
+        self.assertRegex(body, r'default_prompt: ".*\$managing-experiments.*"')
+        self.assertIn("allow_implicit_invocation: true", body)
 
 
 if __name__ == "__main__":
