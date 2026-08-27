@@ -195,6 +195,24 @@ class SkillPackageTest(unittest.TestCase):
 class ManagingExperimentsSkillPackageTest(unittest.TestCase):
     """配布可能な実験管理skillのpackage契約を検証する。"""
 
+    @staticmethod
+    def _contract_units(body: str) -> list[str]:
+        units: list[str] = []
+        for line in body.splitlines():
+            normalized = re.sub(
+                r"^\s*(?:[-+*]|\d+[.)])\s+", "", line.strip()
+            ).strip(" |\t")
+            normalized = normalized.strip("*_`")
+            clauses = [
+                sentence.strip().strip("*_`")
+                for sentence in re.split(
+                    r"(?:(?<=[.!?;:])\s+|\s+[—–]\s+)", normalized
+                )
+                if sentence.strip()
+            ]
+            units.extend([normalized, *clauses] if len(clauses) > 1 else clauses)
+        return units
+
     def assertParagraphContains(
         self, body: str, *patterns: str, message: str
     ) -> None:
@@ -204,6 +222,16 @@ class ManagingExperimentsSkillPackageTest(unittest.TestCase):
             any(
                 all(re.search(pattern, paragraph, re.IGNORECASE) for pattern in patterns)
                 for paragraph in paragraphs
+            ),
+            message,
+        )
+
+    def assertContractUnit(self, body: str, pattern: str, message: str) -> None:
+        """肯定または禁止の向きを含む短い契約単位を検証する。"""
+        self.assertTrue(
+            any(
+                re.search(pattern, unit, re.IGNORECASE)
+                for unit in self._contract_units(body)
             ),
             message,
         )
@@ -314,14 +342,70 @@ class ManagingExperimentsSkillPackageTest(unittest.TestCase):
             r"(?:を必ず使|使用必須|必須(?:である|です|とする)|に限定))",
             re.IGNORECASE,
         )
+        tool_pattern = re.compile(
+            r"\b(?:hydra|pueue|wandb|w&b|lightning)\b", re.IGNORECASE
+        )
+        imperative_pattern = re.compile(
+            r"(?:^|[.!?;:]\s+|\s+[—–]\s+)"
+            r"(?:(?:for|on|during|to)\b[^,;:]{0,120}[,;:]\s*)?"
+            r"(?:please\s+)?(?:adopt|configure|execute|invoke|launch|log|manage|"
+            r"orchestrate|resume|reuse|run|schedule|start|track|train|use)\b",
+            re.IGNORECASE,
+        )
+        availability_pattern = re.compile(
+            r"\b(?:if|when|only when|already|existing|available|optional|"
+            r"present|installed|configured)\b",
+            re.IGNORECASE,
+        )
+
+        package_text_parts: list[str] = []
 
         for path in text_files:
             text = path.read_text(encoding="utf-8")
+            package_text_parts.append(text)
             lowered = text.lower()
             for token in forbidden_identities:
                 with self.subTest(path=path, identity=token):
                     self.assertNotIn(token, lowered)
             self.assertNotRegex(text, mandatory_tool_pattern, str(path))
+            for unit in self._contract_units(text):
+                if tool_pattern.search(unit) and imperative_pattern.search(unit):
+                    with self.subTest(path=path, imperative=unit):
+                        self.assertRegex(unit, availability_pattern)
+
+        package_text = "\n\n".join(package_text_parts)
+        tool_contract = next(
+            (
+                paragraph
+                for paragraph in re.split(r"\n\s*\n", package_text)
+                if all(
+                    re.search(pattern, paragraph, re.IGNORECASE)
+                    for pattern in (
+                        r"\bhydra\b",
+                        r"\bpueue\b",
+                        r"\b(?:wandb|w&b)\b",
+                        r"\blightning\b",
+                        r"\brepositor(?:y|ies)\b",
+                        r"\b(?:existing|available)\b",
+                    )
+                )
+                and any(
+                    re.search(
+                        r"^(?=.*\b(?:existing|available)\b)"
+                        r"(?:(?:if|when|only when|for)\b[^,;:]{0,140}[,;:]\s*)?"
+                        r"(?:adopt|reuse|use)\b",
+                        unit,
+                        re.IGNORECASE,
+                    )
+                    for unit in self._contract_units(paragraph)
+                )
+            ),
+            None,
+        )
+        self.assertIsNotNone(
+            tool_contract,
+            "既存または利用可能なtoolだけを使うportable契約が必要です",
+        )
 
     def test_package_excludes_user_requested_topics(self) -> None:
         self.assertTrue(
@@ -365,39 +449,51 @@ class ManagingExperimentsSkillPackageTest(unittest.TestCase):
         )
         body = reference_file.read_text(encoding="utf-8")
 
-        self.assertParagraphContains(
+        self.assertContractUnit(
             body,
-            r"\bexperiment (?:configs?|configurations?)\b",
-            r"\binherit\w*\b",
-            r"\b(?:avoid|do not|must not|never|prohibit\w*)\b",
+            r"^(?:"
+            r"(?:do not|never)\s+inherit\b"
+            r"(?=.*\bexperiment (?:configs?|configurations?)\b)|"
+            r"avoid\s+inherit\w*\b"
+            r"(?=.*\bexperiment (?:configs?|configurations?)\b)|"
+            r"prohibit\b(?=.*\binherit\w*\b)"
+            r"(?=.*\bexperiment (?:configs?|configurations?)\b)|"
+            r"experiment (?:configs?|configurations?)\b"
+            r"(?=.*\b(?:do not|must not|never)\s+inherit\b)"
+            r")",
             message="experiment config同士を継承させない契約が必要です",
         )
-        self.assertParagraphContains(
+        self.assertContractUnit(
             body,
-            r"\b(?:extract|promote|move)\w*\b",
-            r"\b(?:stable|shared)\b",
-            r"\bcomponents?\b",
+            r"^(?:extract|promote|move)\b"
+            r"(?=.*\b(?:stable|shared)\b)(?=.*\bcomponents?\b)",
             message="stable/shared componentを抽出する契約が必要です",
         )
-        self.assertParagraphContains(
+        self.assertContractUnit(
             body,
-            r"\bspeculative\w*\b",
-            r"\b(?:config(?:uration)? groups?|groups?)\b",
-            r"\b(?:without|unless|lack(?:s|ing)?)\b",
-            r"\b(?:implementation|owner)\b",
-            r"\b(?:avoid|do not|must not|never|prohibit\w*)\b",
+            r"^(?=.*\bspeculative\w*\b)"
+            r"(?=.*\b(?:config(?:uration)? groups?|groups?)\b)"
+            r"(?=.*\b(?:without|unless|lack(?:s|ing)?)\b)"
+            r"(?=.*\b(?:implementation|owner)\b)"
+            r"(?:avoid|prohibit|(?:do not|never)\s+(?:add|create|invent))\b",
             message="実装・ownerのないspeculative groupを禁止する契約が必要です",
         )
-        self.assertParagraphContains(
+        self.assertContractUnit(
             body,
-            r"\bdataset artifacts?\b",
-            r"\bgenerator recipes?\b",
-            r"\b(?:separate|distinguish|differentiate)\w*\b",
+            r"^(?:separate\s+dataset artifacts?\s+from\s+generator recipes?|"
+            r"keep\s+dataset artifacts?\s+separate\s+from\s+generator recipes?)\b",
             message="dataset artifactとgenerator recipeを分離する契約が必要です",
         )
-        self.assertRegex(body, re.compile(r"\bframework[- ]independent\b", re.I))
-        self.assertRegex(body, re.compile(r"\bdomain code\b", re.I))
-        self.assertRegex(body, re.compile(r"\bthin entrypoint\b", re.I))
+        self.assertContractUnit(
+            body,
+            r"^(?:keep|make)\s+domain code\s+framework[- ]independent\b",
+            message="domain codeをframework-independentに保つ契約が必要です",
+        )
+        self.assertContractUnit(
+            body,
+            r"^use\s+(?:a\s+)?thin entrypoint\b",
+            message="thin entrypointを使う契約が必要です",
+        )
 
     def test_run_lifecycle_reference_requires_evidence_and_attempt_tracking(self) -> None:
         self.assertTrue(
@@ -423,34 +519,76 @@ class ManagingExperimentsSkillPackageTest(unittest.TestCase):
             r"\b(?:complete|completion|verified)\b",
             message="YAML・job・process・checkpointの存在だけでは完了にしない契約が必要です",
         )
-        for status in ("queued", "running", "failed", "partial", "verified", "unknown"):
-            with self.subTest(run_status=status):
-                self.assertRegex(body, re.compile(rf"\b{status}\b", re.IGNORECASE))
-        self.assertRegex(body, re.compile(r"\bevidence\b", re.IGNORECASE))
-        self.assertParagraphContains(
+        statuses = ("queued", "running", "failed", "partial", "verified", "unknown")
+        status_contract = next(
+            (
+                paragraph
+                for paragraph in re.split(r"\n\s*\n", body)
+                if all(
+                    re.search(rf"\b{status}\b", paragraph, re.IGNORECASE)
+                    for status in statuses
+                )
+                and re.search(r"\bevidence\b", paragraph, re.IGNORECASE)
+                and (
+                    any(
+                        re.search(
+                            r"^(?:"
+                            r"(?:classify|label|record|report|track)\b"
+                            r"(?=.*\b(?:status|state)\b)"
+                            r"(?=.*\b(?:with|alongside)\b[^.!?]{0,40}"
+                            r"\bevidence\b)|"
+                            r"attach\b(?=.*\bevidence\b)"
+                            r"(?=.*\b(?:to|with)\b[^.!?]{0,40}\b(?:status|state)\b)|"
+                            r"pair\b(?=.*\b(?:status|state)\b)"
+                            r"(?=.*\bwith\b[^.!?]{0,40}\bevidence\b)"
+                            r")",
+                            unit,
+                            re.IGNORECASE,
+                        )
+                        for unit in self._contract_units(paragraph)
+                    )
+                    or re.search(
+                        r"(?im)^\s*\|?[^\n]*(?:"
+                        r"\bstatus\b[^\n]*\bevidence\b|"
+                        r"\bevidence\b[^\n]*\bstatus\b)"
+                        r"[^\n]*\|?\s*$",
+                        paragraph,
+                    )
+                )
+            ),
+            None,
+        )
+        self.assertIsNotNone(
+            status_contract,
+            "全statusとevidenceを結び付けるparagraphまたはtableが必要です",
+        )
+        self.assertContractUnit(
             body,
-            r"\bexperiment identity\b",
-            r"\b(?:attempts?|runs?)\b",
-            r"\b(?:separate|distinguish)\w*\b",
+            r"^(?:"
+            r"(?:separate|distinguish)\b(?=.*\bexperiment identity\b)"
+            r"(?=.*\b(?:attempts?|runs?)\b)|"
+            r"keep\s+experiment identity\s+separate\b"
+            r"(?=.*\b(?:attempts?|runs?)\b)"
+            r")",
             message="experiment identityとattempt/runを分離する契約が必要です",
         )
-        self.assertParagraphContains(
+        conditional_prefix = (
+            r"(?:(?:after|before|for|if|when)\b[^,;:]{0,140}[,;:]\s*)?"
+        )
+        self.assertContractUnit(
             body,
-            r"\bsame hypothesis\b",
-            r"\bretr(?:y|ies|ied|ying)\b",
-            r"\bexperiment (?:id|identity)\b",
-            r"\b(?:retain|preserve|keep|reuse)\w*\b",
+            r"^(?=.*\bsame hypothesis\b)(?=.*\bretr(?:y|ies|ied|ying)\b)"
+            r"(?=.*\bexperiment (?:id|identity)\b)"
+            + conditional_prefix
+            + r"(?:retain|preserve|keep|reuse)\b",
             message="同一仮説のretryでexperiment IDを維持する契約が必要です",
         )
-        self.assertRegex(
+        self.assertContractUnit(
             body,
-            re.compile(
-                r"\b(?:retire|archive|supersede|invalidate)\w*\b[^.\n]{0,100}"
-                r"\b(?:old|previous|prior) outputs?\b|"
-                r"\b(?:old|previous|prior) outputs?\b[^.\n]{0,100}"
-                r"\b(?:retire|archive|supersede|invalidate)\w*\b",
-                re.IGNORECASE,
-            ),
+            r"^(?=.*\b(?:old|previous|prior) outputs?\b)"
+            + conditional_prefix
+            + r"(?:archive|invalidate|retire|supersede)\b",
+            message="旧outputを肯定的に退役またはarchiveする契約が必要です",
         )
 
     def test_openai_metadata_supports_implicit_invocation(self) -> None:
