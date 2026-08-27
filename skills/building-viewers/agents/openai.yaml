@@ -1,0 +1,6 @@
+interface:
+  display_name: "Viewer Builder"
+  short_description: "Build portable read-only browser viewers"
+  default_prompt: "Use $building-viewers to build a read-only viewer for this repository."
+policy:
+  allow_implicit_invocation: true

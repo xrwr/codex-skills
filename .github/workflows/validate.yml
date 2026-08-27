@@ -1,0 +1,47 @@
+name: Validate skills
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m unittest -v tests/test_skill_package.py
+
+  starter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Render starter
+        run: >-
+          python skills/building-viewers/scripts/scaffold_viewer.py /tmp/viewer
+          --project-name "CI Viewer"
+          --package-name ci_viewer
+      - name: Test backend
+        working-directory: /tmp/viewer/backend
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+          pytest -q
+      - name: Test frontend
+        working-directory: /tmp/viewer/frontend
+        run: |
+          npm install
+          npm test
+          npm run lint
+          npm run build
