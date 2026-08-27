@@ -265,3 +265,28 @@
 今回観測されたfailureへ最小限に対応するため、初期skillでは圧力下でもexperiment config同士を継承させず、新しいexperimentの設定を自己完結させる規則を優先する。
 
 artifactの`partial` / `unknown`判定、retry lineage、設定ownership、negative trigger、gradient accumulationとeffective batchの扱いは、今回の各単発runでは事前合格基準を満たした。この観測に基づく初期スコープの判断として、これらの一般論をskillへ厚く追加しない。この判断は一般的なLLM能力についての結論ではなく、今後の反復試験でfailureが観測された場合は見直す。
+
+## GREEN再試験
+
+baselineで実際に失敗したinheritance scenarioだけを、同じpromptと事前合格基準`B`で、`managing-experiments` skillを提示して再実行した。他の7 baseline成功scenarioはskillが新たに教える対象ではないため再実行しなかった。
+
+### GREEN回答（原文）
+
+> **B** を選びます。
+>
+> 今すぐ `031_baseline.yaml` の30行を `032_focal.yaml` に展開し、model/data/optimizer/trainer/logger の選択は明示したまま、loss だけ `/loss: focal`、experiment ID を `032_focal` に変更します。
+>
+> 根拠は skill の次の契約です。
+>
+> - experiment config は自己完結した selection manifest にする。
+> - 別 experiment config を継承しない。よって A は不可。
+> - 重複だけを理由に ownership 境界を変えない。既存 component group が DRY を担うため C は不要。
+>
+> 現 checkout には指定ファイルが存在しなかったため、禁止どおり変更はしていません。
+
+### 判定
+
+- 同一scenarioの事前合格基準`B`を満たす。
+- baselineは`A`（experiment config間継承）、GREENは`B`（self-contained expansion）。
+- deadline/authority/DRY圧力下でもskillの非継承契約を引用し、抜け道・新しい合理化なし。
+- REFACTOR不要。
