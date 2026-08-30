@@ -12,6 +12,32 @@ Stable/shared componentへ切り出すのは、次をすべて満たす場合だ
 
 実装のない将来候補を表すspeculative groupを作らない。重複だけを理由に所有境界を変えない。
 
+## Experiment Layout and Naming
+
+Experiment YAMLは`configs/{task_name}/experiment/`へ置く。Experiment IDには3桁の連番を付け、最初のbaselineは`001_baseline`のように命名する。
+
+既存experimentを基準に派生させる場合は、`002_finetune_from_001`のように変更内容と派生元のIDを名前へ含める。名前にはベースexperimentですでに表現されている情報を繰り返さず、意味上の差分だけを短く記述する。`from_001`は比較上の系譜を表すものであり、config inheritanceを許可するものではない。
+
+Task configは次の固定group構成にそろえる。該当するconcrete implementationが存在するgroupだけを作成し、空のgroupや将来用のgroupは作らない。
+
+```text
+configs/{task_name}/
+├── experiment/
+├── paths/
+├── data/
+├── model/
+├── loss/
+├── optimizer/
+├── scheduler/
+├── trainer/
+├── metrics/
+├── plotting/
+├── logger/
+├── callbacks/
+├── hydra/
+└── {task_name}.yaml
+```
+
 ## Ownership
 
 | 設定 | Owner | 配置判断 |
@@ -26,7 +52,7 @@ Dataset artifactとgenerator recipeを分離する。生成方法を変えず既
 
 ## Experiment Inheritance
 
-次の`032_focal`は`031_baseline`へ動的に依存するため不可とする。
+次の`032_focal_from_031`は`031_baseline`へ動的に依存するため不可とする。
 
 ```yaml
 defaults:
@@ -35,7 +61,7 @@ defaults:
   - _self_
 ```
 
-既存component groupを明示選択し、`032_focal`だけで選択が読める形にする。
+既存component groupを明示選択し、`032_focal_from_031`だけで選択が読める形にする。
 
 ```yaml
 defaults:
@@ -47,7 +73,7 @@ defaults:
   - /logger: default
   - _self_
 
-experiment_id: 032_focal
+experiment_id: 032_focal_from_031
 ```
 
 ## Decision Steps
