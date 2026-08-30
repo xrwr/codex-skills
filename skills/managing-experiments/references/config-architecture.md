@@ -14,28 +14,38 @@ Stable/shared componentへ切り出すのは、次をすべて満たす場合だ
 
 ## Experiment Layout and Naming
 
-Experiment YAMLは`configs/{task_name}/experiment/`へ置く。Experiment IDには3桁の連番を付け、最初のbaselineは`001_baseline`のように命名する。
+実行単位の設定を`configs/tasks/{task_name}/`、複数taskで共有する設定部品を`configs/components/`へ分離する。各taskのentry configは`config.yaml`、experiment YAMLは`configs/tasks/{task_name}/experiment/`へ置く。Taskだけが使うgeneratorなどのgroupは、そのtaskの直下へ置く。
 
-既存experimentを基準に派生させる場合は、`002_finetune_from_001`のように変更内容と派生元のIDを名前へ含める。名前にはベースexperimentですでに表現されている情報を繰り返さず、意味上の差分だけを短く記述する。`from_001`は比較上の系譜を表すものであり、config inheritanceを許可するものではない。
+各runnable taskの最小動作確認には`000_{task_name}_smoke`を使う。通常のExperiment IDには3桁の連番を付け、最初のbaselineは`001_baseline`のように命名する。既存experimentを基準に派生させる場合は、`002_finetune_from_001`のように変更内容と派生元のIDを名前へ含める。名前にはベースexperimentですでに表現されている情報を繰り返さず、意味上の差分だけを短く記述する。`from_001`は比較上の系譜を表すものであり、config inheritanceを許可するものではない。
 
-Task configは次の固定group構成にそろえる。該当するconcrete implementationが存在するgroupだけを作成し、空のgroupや将来用のgroupは作らない。
+Config groupは次のownershipと名称にそろえる。これは許可するgroupの語彙であり、該当するconcrete implementationが存在するgroupだけを作成する。空のdirectoryや将来用のgroupは作らない。
 
 ```text
-configs/{task_name}/
-├── experiment/
-├── paths/
-├── data/
-├── model/
-├── loss/
-├── optimizer/
-├── scheduler/
-├── trainer/
-├── metrics/
-├── plotting/
-├── logger/
-├── callbacks/
-├── hydra/
-└── {task_name}.yaml
+configs/
+├── tasks/
+│   └── {task_name}/
+│       ├── config.yaml
+│       ├── experiment/
+│       └── {task-local-group}/
+└── components/
+    ├── paths/
+    ├── dataset/
+    ├── schema/
+    ├── split/
+    ├── preprocessing/
+    ├── augmentation/
+    ├── sampling/
+    ├── dataloader/
+    ├── model/
+    ├── loss/
+    ├── decoder/
+    ├── metrics/
+    ├── optimizer/
+    ├── scheduler/
+    ├── trainer/
+    ├── logger/
+    ├── callbacks/
+    └── hydra/
 ```
 
 ## Ownership
@@ -65,12 +75,12 @@ defaults:
 
 ```yaml
 defaults:
-  - /model: encoder
-  - /data: dataset_v2
-  - /optimizer: adamw
-  - /loss: focal
-  - /trainer: standard
-  - /logger: default
+  - /components/model@task.model: encoder
+  - /components/dataset@task.dataset: dataset_v2
+  - /components/optimizer@task.optimizer: adamw
+  - /components/loss@task.loss: focal
+  - /components/trainer@task.trainer: standard
+  - /components/logger@task.logger: default
   - _self_
 
 experiment_id: 032_focal_from_031
