@@ -16,7 +16,7 @@ Stable/shared componentへ切り出すのは、次をすべて満たす場合だ
 
 実行単位の設定を`configs/tasks/{task_name}/`、複数taskで共有する設定部品を`configs/components/`へ分離する。各taskのentry configは`config.yaml`、experiment YAMLは`configs/tasks/{task_name}/experiment/`へ置く。Taskだけが使うgeneratorなどのgroupは、そのtaskの直下へ置く。
 
-各runnable taskの最小動作確認には`000_{task_name}_smoke`を使う。通常のExperiment IDには3桁の連番を付け、最初のbaselineは`001_baseline`のように命名する。既存experimentを基準に派生させる場合は、`002_finetune_from_001`のように変更内容と派生元のIDを名前へ含める。名前にはベースexperimentですでに表現されている情報を繰り返さず、意味上の差分だけを短く記述する。`from_001`は比較上の系譜を表すものであり、config inheritanceを許可するものではない。
+通常のExperiment IDには3桁の連番を付け、最初のbaselineは`001_baseline`のように命名する。既存experimentを基準に派生させる場合は、`002_finetune_from_001`のように変更内容と派生元のIDを名前へ含める。名前にはベースexperimentですでに表現されている情報を繰り返さず、意味上の差分だけを短く記述する。`from_001`は比較上の系譜を表すものであり、config inheritanceを許可するものではない。
 
 Config groupは次のownershipと名称にそろえる。これは許可するgroupの語彙であり、該当するconcrete implementationが存在するgroupだけを作成する。空のdirectoryや将来用のgroupは作らない。
 
