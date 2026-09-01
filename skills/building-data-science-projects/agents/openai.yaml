@@ -1,0 +1,7 @@
+interface:
+  display_name: "Data Science Project Builder"
+  short_description: "Choose a focused Python data science stack"
+  default_prompt: "Use $building-data-science-projects to structure this Python data science project and choose only the libraries it needs."
+
+policy:
+  allow_implicit_invocation: true
