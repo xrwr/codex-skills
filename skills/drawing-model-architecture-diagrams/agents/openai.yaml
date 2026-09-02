@@ -1,0 +1,7 @@
+interface:
+  display_name: "Model Architecture Diagrammer"
+  short_description: "モデル構造とtensor shapeをSVGで図解"
+  default_prompt: "Use $drawing-model-architecture-diagrams to explain this model architecture as an SVG diagram."
+
+policy:
+  allow_implicit_invocation: true

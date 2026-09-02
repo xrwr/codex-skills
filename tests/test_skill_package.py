@@ -12,6 +12,9 @@ from pathlib import Path
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 SKILL_ROOT = REPOSITORY_ROOT / "skills" / "building-viewers"
 MANAGING_EXPERIMENTS_SKILL_ROOT = REPOSITORY_ROOT / "skills" / "managing-experiments"
+MODEL_DIAGRAM_SKILL_ROOT = (
+    REPOSITORY_ROOT / "skills" / "drawing-model-architecture-diagrams"
+)
 
 
 class RepositoryToolingTest(unittest.TestCase):
@@ -313,6 +316,98 @@ class ManagingExperimentsSkillPackageTest(unittest.TestCase):
         self.assertIn("DDP", body)
         self.assertRegex(body, r"明示.*指示.*DDP")
         self.assertNotIn("sbatch --gres", body)
+
+
+class ModelArchitectureDiagramSkillPackageTest(unittest.TestCase):
+    """モデルアーキテクチャ図skillの配布契約を検証する。"""
+
+    def test_metadata_targets_model_architecture_diagrams(self) -> None:
+        skill_file = MODEL_DIAGRAM_SKILL_ROOT / "SKILL.md"
+        self.assertTrue(skill_file.is_file(), "SKILL.mdが必要です")
+        body = skill_file.read_text(encoding="utf-8")
+        frontmatter_match = re.match(
+            r"\A---\n(?P<frontmatter>.*?)\n---(?:\n|\Z)", body, re.DOTALL
+        )
+
+        self.assertIsNotNone(frontmatter_match, "YAML frontmatterが必要です")
+        assert frontmatter_match is not None
+        frontmatter = frontmatter_match.group("frontmatter").splitlines()
+        self.assertEqual(len(frontmatter), 2)
+        self.assertEqual(frontmatter[0], "name: drawing-model-architecture-diagrams")
+        description = frontmatter[1].removeprefix("description: ")
+        self.assertTrue(description.startswith("Use when "))
+        self.assertIn("explicitly asks", description)
+        self.assertIn("architecture", description.lower())
+        self.assertIn("SVG", description)
+        self.assertIn("図", description)
+
+    def test_package_stays_minimal_without_renderer_or_diagram_dsl(self) -> None:
+        expected = {
+            "SKILL.md",
+            "agents/openai.yaml",
+            "references/svg-guidelines.md",
+        }
+        actual = {
+            path.relative_to(MODEL_DIAGRAM_SKILL_ROOT).as_posix()
+            for path in MODEL_DIAGRAM_SKILL_ROOT.rglob("*")
+            if path.is_file()
+        }
+
+        self.assertEqual(actual, expected)
+        self.assertFalse((MODEL_DIAGRAM_SKILL_ROOT / "scripts").exists())
+        self.assertFalse((MODEL_DIAGRAM_SKILL_ROOT / "assets").exists())
+
+    def test_skill_defines_shape_and_semantic_granularity_contracts(self) -> None:
+        body = (MODEL_DIAGRAM_SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+
+        self.assertIn("入力shapeと出力shapeは必須", body)
+        self.assertIn("責務", body)
+        self.assertIn("4〜9", body)
+        self.assertIn("branch", body)
+        self.assertIn("merge", body)
+        self.assertIn("shared weight", body)
+        self.assertIn("symbolic shape", body)
+        self.assertIn("shape unknown", body)
+        self.assertIn("推測", body)
+        self.assertIn("SVGを直接", body)
+        self.assertIn("実際にrender", body)
+        self.assertRegex(body, r"U-Net Encoder.*一つ")
+
+    def test_svg_reference_preserves_editability_and_accessibility(self) -> None:
+        body = (
+            MODEL_DIAGRAM_SKILL_ROOT / "references" / "svg-guidelines.md"
+        ).read_text(encoding="utf-8")
+
+        for token in (
+            "viewBox",
+            "<text>",
+            "marker-end",
+            "<title>",
+            "<desc>",
+            "外部font",
+            "文字切れ",
+            "矢印",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, body)
+
+    def test_openai_metadata_supports_implicit_invocation(self) -> None:
+        metadata_file = MODEL_DIAGRAM_SKILL_ROOT / "agents" / "openai.yaml"
+        self.assertTrue(metadata_file.is_file(), "agents/openai.yamlが必要です")
+        body = metadata_file.read_text(encoding="utf-8")
+
+        self.assertIn('display_name: "Model Architecture Diagrammer"', body)
+        self.assertRegex(
+            body,
+            r'default_prompt: ".*\$drawing-model-architecture-diagrams.*"',
+        )
+        self.assertIn("allow_implicit_invocation: true", body)
+
+    def test_readme_lists_the_new_skill_and_install_path(self) -> None:
+        readme = (REPOSITORY_ROOT / "README.md").read_text(encoding="utf-8")
+
+        self.assertIn("### `drawing-model-architecture-diagrams`", readme)
+        self.assertIn("--path skills/drawing-model-architecture-diagrams", readme)
 
 
 if __name__ == "__main__":

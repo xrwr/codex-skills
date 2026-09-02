@@ -22,6 +22,10 @@ Plan, configure, retry, and assess repository experiments with self-contained ex
 
 Run status is reported from evidence that can be traced to the current attempt, not from a queue label or checkpoint alone. The skill separates experiment identity from attempt lineage, so retries retain the experiment ID while old outputs are retired and every new attempt remains auditable.
 
+### `drawing-model-architecture-diagrams`
+
+Create editable SVG diagrams that explain model architectures as semantic data flows rather than exhaustive layer listings. The skill requires input and output tensor shapes, expands only structure that matters to the explanation, uses symbolic dimensions instead of invented values, and verifies the rendered SVG.
+
 ## Install
 
 ### `building-viewers`
@@ -72,13 +76,29 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
   --path skills/managing-experiments
 ```
 
+### `drawing-model-architecture-diagrams`
+
+Ask Codex to install the skill from this repository:
+
+```text
+Install the drawing-model-architecture-diagrams skill from xrwr/codex-skills.
+```
+
+Or run the bundled installer directly:
+
+```bash
+python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo xrwr/codex-skills \
+  --path skills/drawing-model-architecture-diagrams
+```
+
 Restart Codex after installation. For reproducible machine setup, keep the repository URL and a release tag in dotfiles; keep the skill source and reusable assets here.
 
 ## Development
 
 ```bash
 uv run python -m unittest -v tests/test_skill_package.py
-for skill in building-viewers building-data-science-projects managing-experiments; do
+for skill in building-viewers building-data-science-projects managing-experiments drawing-model-architecture-diagrams; do
   uv run python ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py \
     "skills/$skill"
 done
