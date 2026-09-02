@@ -296,6 +296,24 @@ class ManagingExperimentsSkillPackageTest(unittest.TestCase):
         self.assertRegex(body, r'default_prompt: ".*\$managing-experiments.*"')
         self.assertIn("allow_implicit_invocation: true", body)
 
+    def test_run_lifecycle_defines_multi_gpu_resource_contract(self) -> None:
+        """複数GPUではPueue独立jobを既定にし、DDPを暗黙に使わない。"""
+
+        lifecycle_file = (
+            MANAGING_EXPERIMENTS_SKILL_ROOT / "references" / "run-lifecycle.md"
+        )
+        body = lifecycle_file.read_text(encoding="utf-8")
+
+        self.assertIn("## GPU Resource Contract", body)
+        self.assertIn("Pueueを既定", body)
+        self.assertIn("独立した1-GPU job", body)
+        self.assertIn("parallel=1", body)
+        self.assertIn("CUDA_VISIBLE_DEVICES", body)
+        self.assertIn("相互排他", body)
+        self.assertIn("DDP", body)
+        self.assertRegex(body, r"明示.*指示.*DDP")
+        self.assertNotIn("sbatch --gres", body)
+
 
 if __name__ == "__main__":
     unittest.main()

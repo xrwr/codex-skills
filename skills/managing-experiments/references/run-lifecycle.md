@@ -6,6 +6,23 @@ Experiment identityを、検証する仮説、入力、split、意味上の変�
 
 仮説が同じretryではexperiment IDを維持する。新しいattempt/run IDを発行し、旧outputを失敗attemptとして退役またはarchiveしてから、空のcanonical outputへ実行する。仮説または意味上の比較対象が変わる場合だけ新experimentにする。
 
+## GPU Resource Contract
+
+複数GPUマシンでは、ユーザーから別の明示的な指示がない限り、Pueueを既定として複数experiment、fold、trialを独立した1-GPU jobで実行する。GPUが複数あることを理由に、DDP、DataParallel、model sharding、1 jobでの複数GPU利用を選ばない。
+
+投入前にGPUの台数、model、VRAM、稼働状況と、Pueueのgroup、`parallel`、既存の投入wrapperを検査する。GPUごとに固定groupを1つ対応させ、各groupを`parallel=1`にする。投入wrapperまたはtaskの環境で対応GPUを`CUDA_VISIBLE_DEVICES`へbindし、すべてのGPU jobを対応group経由に統一する。
+
+```bash
+pueue add --group gpu-0 --label 042-attempt-01 \
+  'CUDA_VISIBLE_DEVICES=0 uv run python scripts/train.py experiment=042_full_ft'
+```
+
+Repository固有のgroup名、entrypoint、config overrideに置き換える。Pueue groupはそれ自体ではGPUをbindせず、`parallel=1`も同じgroup内だけを制限する。複数groupを同じGPUへ対応させたり、group外から直接GPU jobを起動したりすると相互排他が崩れる。Pueueが未設定なら勝手にDDPや直接実行へ切り替えず、必要なgroupとbinding方法を提案して未実行とする。
+
+AttemptごとにPueue job ID、group、割当GPU、GPU model、host、launch commandをresolved configまたはrun記録へ残す。同じexperimentのretryを別GPUへ移す場合も、experiment IDを維持して新attemptとし、旧attemptの出力を混在させない。
+
+ユーザーがDDPまたは1 jobでの複数GPU利用を明示的に指示した場合だけ、repositoryの対応状況と比較条件への影響を別途調査して設計する。この指示がない状態でdistributed実行を実装、設定、投入しない。
+
 ## Artifact Evidence
 
 依頼とrepositoryから、必要artifact contractを先に確定する。YAML、job、process終了、checkpointの存在だけでexperimentをcompleteまたはverifiedにしない。Artifactのrun ID、resolved config、log、timestamp、生成記録を照合し、current attemptへ帰属できる証拠だけを使う。
