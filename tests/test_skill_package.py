@@ -362,16 +362,121 @@ class ModelArchitectureDiagramSkillPackageTest(unittest.TestCase):
 
         self.assertIn("入力shapeと出力shapeは必須", body)
         self.assertIn("責務", body)
-        self.assertIn("4〜9", body)
+        self.assertIn("総要素数を上限で縛らない", body)
+        self.assertIn("視覚文法", body)
+        self.assertIn("一つの抽象度", body)
+        self.assertIn("一箇所だけ", body)
+        self.assertIn("省略記号", body)
         self.assertIn("branch", body)
         self.assertIn("merge", body)
         self.assertIn("shared weight", body)
         self.assertIn("symbolic shape", body)
         self.assertIn("shape unknown", body)
+        self.assertIn("中間tensor", body)
+        self.assertIn("最終入力と最終出力", body)
+        self.assertIn("実データ", body)
+        self.assertIn("operation blockには処理名だけ", body)
+        self.assertIn("shapeはblockの外", body)
+        self.assertIn("補足説明を置かない", body)
+        self.assertIn("axis continuity", body)
         self.assertIn("推測", body)
         self.assertIn("SVGを直接", body)
         self.assertIn("実際にrender", body)
         self.assertRegex(body, r"U-Net Encoder.*一つ")
+
+    def test_skill_requires_a_visible_shape_for_every_external_input_and_output(self) -> None:
+        skill_body = (MODEL_DIAGRAM_SKILL_ROOT / "SKILL.md").read_text(
+            encoding="utf-8"
+        )
+        reference_body = (
+            MODEL_DIAGRAM_SKILL_ROOT / "references" / "svg-guidelines.md"
+        ).read_text(encoding="utf-8")
+
+        for token in (
+            "各最終入力と各最終出力",
+            "必ず個別に表示",
+            "不明でも省略せず",
+            "shape unknown",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, skill_body)
+
+        for token in (
+            "対応するglyphに隣接",
+            "複数の入出力",
+            "縮小表示でも",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, reference_body)
+
+    def test_svg_reference_defines_visual_grammar_and_tensor_glyphs(self) -> None:
+        body = (
+            MODEL_DIAGRAM_SKILL_ROOT / "references" / "svg-guidelines.md"
+        ).read_text(encoding="utf-8")
+
+        for token in (
+            "outer panel",
+            "実データに近いglyph",
+            "sequence",
+            "feature map",
+            "vector",
+            "matrix",
+            "rank",
+            "TeX",
+            "数式だけ",
+            "交差を0",
+            "凡例",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, body)
+
+    def test_svg_reference_makes_merges_and_repeated_feedback_explicit(self) -> None:
+        body = (
+            MODEL_DIAGRAM_SKILL_ROOT / "references" / "svg-guidelines.md"
+        ).read_text(encoding="utf-8")
+
+        for token in (
+            "複数tensorから一つの出力",
+            "演算glyph",
+            "branch point",
+            "反復範囲",
+            "一回の反復内",
+            "中間tensor",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, body)
+
+    def test_svg_reference_distinguishes_shared_operations_and_persistent_state(self) -> None:
+        body = (
+            MODEL_DIAGRAM_SKILL_ROOT / "references" / "svg-guidelines.md"
+        ).read_text(encoding="utf-8")
+
+        for token in (
+            "独立したport",
+            "shared-weight marker",
+            "永続artifact",
+            "build/index",
+            "inference lane",
+            "永続artifactだけ",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, body)
+
+    def test_svg_reference_defines_compact_arrow_geometry(self) -> None:
+        body = (
+            MODEL_DIAGRAM_SKILL_ROOT / "references" / "svg-guidelines.md"
+        ).read_text(encoding="utf-8")
+
+        for token in (
+            "block outlineの0.6倍",
+            "stroke幅の3〜4倍",
+            "target glyphの高さの1/3",
+            "target境界に垂直",
+            "arrowhead長の2倍",
+            "marker tip",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, body)
 
     def test_svg_reference_preserves_editability_and_accessibility(self) -> None:
         body = (
