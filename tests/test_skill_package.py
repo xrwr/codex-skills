@@ -317,6 +317,24 @@ class ManagingExperimentsSkillPackageTest(unittest.TestCase):
         self.assertRegex(body, r"明示.*指示.*DDP")
         self.assertNotIn("sbatch --gres", body)
 
+    def test_skill_records_hypothesis_before_starting_an_experiment(self) -> None:
+        """実験開始前に仮説と判定条件をrepositoryへ残す。"""
+
+        body = (MANAGING_EXPERIMENTS_SKILL_ROOT / "SKILL.md").read_text(
+            encoding="utf-8"
+        )
+
+        for token in (
+            "実験開始前",
+            "検証可能な仮説",
+            "予想する変化",
+            "成否を判断する指標",
+            "repository",
+            "記録",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, body)
+
 
 class ModelArchitectureDiagramSkillPackageTest(unittest.TestCase):
     """モデルアーキテクチャ図skillの配布契約を検証する。"""
