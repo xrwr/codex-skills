@@ -604,7 +604,68 @@ class SummarizingExperimentsSkillPackageTest(unittest.TestCase):
             SUMMARIZING_EXPERIMENTS_SKILL_ROOT / "references" / "report-contract.md"
         ).read_text(encoding="utf-8")
 
-        self.assertIn("| 実験 | 親 | 仮説 | 結果 | F1 |", body)
+        lines = body.splitlines()
+        header_index = next(
+            (
+                index
+                for index, line in enumerate(lines)
+                if [cell.strip() for cell in line.strip().strip("|").split("|")][
+                    :2
+                ]
+                == ["実験", "親"]
+            ),
+            None,
+        )
+        self.assertIsNotNone(header_index, "標準の実験一覧表が必要です")
+        assert header_index is not None
+
+        header = [
+            cell.strip()
+            for cell in lines[header_index].strip().strip("|").split("|")
+        ]
+        self.assertEqual(header, ["実験", "親", "仮説", "結果", "F1"])
+
+        separator = [
+            cell.strip()
+            for cell in lines[header_index + 1].strip().strip("|").split("|")
+        ]
+        self.assertEqual(len(separator), 5)
+        self.assertTrue(
+            all(re.fullmatch(r":?-{3,}:?", cell) for cell in separator),
+            "標準表の区切り行が不正です",
+        )
+
+        example_rows: list[list[str]] = []
+        for line in lines[header_index + 2 :]:
+            if not line.strip().startswith("|"):
+                break
+            row = [cell.strip() for cell in line.strip().strip("|").split("|")]
+            self.assertEqual(len(row), 5, f"標準表の行は5セル必要です: {line}")
+            example_rows.append(row)
+
+        self.assertTrue(example_rows, "標準表に実験例が必要です")
+        result_status_pattern = re.compile(
+            r"\A(?:支持|反証|判断保留|未評価)(?:\Z|[。:：\s])"
+        )
+        for experiment_id, parent_id, hypothesis, result, metric in example_rows:
+            with self.subTest(experiment_id=experiment_id):
+                self.assertRegex(experiment_id, r"\A\d+\Z")
+                self.assertRegex(parent_id, r"\A(?:—|\d+(?:,\s*\d+)*)\Z")
+                self.assertTrue(hypothesis, "仮説cellは空にできません")
+                self.assertTrue(result, "結果cellは空にできません")
+                self.assertRegex(
+                    result,
+                    result_status_pattern,
+                    "結果cellは所定の判定から始める必要があります",
+                )
+                self.assertRegex(metric, r"\A(?:—|-?\d+(?:\.\d+)?)\Z")
+                self.assertNotRegex(metric, r"(?:->|=>|→|←|Δ|delta|差分)")
+
+        self.assertIsNone(
+            result_status_pattern.match("支持されなかった"),
+            "判定語の一部一致を受理してはいけません",
+        )
+
         self.assertIn("5列", body)
         self.assertIn("主指標名", body)
         self.assertIn("絶対値", body)
@@ -626,6 +687,30 @@ class SummarizingExperimentsSkillPackageTest(unittest.TestCase):
             body,
         )
         self.assertNotIn("判断保留。比較可能な最終成果物が不足", body)
+        self.assertIn("一覧表示用の短い数字ID", body)
+        self.assertIn("repositoryの実IDが非数字", body)
+        self.assertIn("対応を個別サマリ", body)
+        for token in (
+            "実IDが数字なら",
+            "優先",
+            "既存の対応を再利用",
+            "未割当",
+            "一意な数字ID",
+            "再番号付けしない",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, body)
+
+        design_body = (
+            REPOSITORY_ROOT
+            / "docs"
+            / "plans"
+            / "2026-09-05-summarizing-experiments-design.md"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("短いID", design_body)
+        self.assertIn("短い数字ID", design_body)
+        self.assertIn("既存の対応を再利用", design_body)
+        self.assertIn("再番号付けしない", design_body)
 
     def test_hypothesis_provenance_must_precede_launch(self) -> None:
         skill_body = (
