@@ -8,10 +8,15 @@ import tomllib
 import unittest
 from pathlib import Path
 
+import yaml
+
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 SKILL_ROOT = REPOSITORY_ROOT / "skills" / "building-viewers"
 MANAGING_EXPERIMENTS_SKILL_ROOT = REPOSITORY_ROOT / "skills" / "managing-experiments"
+SUMMARIZING_EXPERIMENTS_SKILL_ROOT = (
+    REPOSITORY_ROOT / "skills" / "summarizing-experiments"
+)
 MODEL_DIAGRAM_SKILL_ROOT = (
     REPOSITORY_ROOT / "skills" / "drawing-model-architecture-diagrams"
 )
@@ -531,6 +536,140 @@ class ModelArchitectureDiagramSkillPackageTest(unittest.TestCase):
 
         self.assertIn("### `drawing-model-architecture-diagrams`", readme)
         self.assertIn("--path skills/drawing-model-architecture-diagrams", readme)
+
+
+class SummarizingExperimentsSkillPackageTest(unittest.TestCase):
+    """配布可能な実験要約skillのpackage契約を検証する。"""
+
+    def test_metadata_uses_generic_summarization_triggers(self) -> None:
+        skill_file = SUMMARIZING_EXPERIMENTS_SKILL_ROOT / "SKILL.md"
+        self.assertTrue(skill_file.is_file(), "SKILL.mdが必要です")
+        body = skill_file.read_text(encoding="utf-8")
+        frontmatter_match = re.match(
+            r"\A---\n(?P<frontmatter>.*?)\n---(?:\n|\Z)", body, re.DOTALL
+        )
+
+        self.assertIsNotNone(frontmatter_match, "YAML frontmatterが必要です")
+        assert frontmatter_match is not None
+        frontmatter = frontmatter_match.group("frontmatter").splitlines()
+        self.assertEqual(len(frontmatter), 2)
+        self.assertEqual(frontmatter[0], "name: summarizing-experiments")
+        description = frontmatter[1].removeprefix("description: ")
+        self.assertTrue(description.startswith("Use when "))
+        self.assertIn("experiment", description.lower())
+        self.assertRegex(description.lower(), r"summar|document|report")
+
+    def test_package_contains_only_required_distribution_resources(self) -> None:
+        expected = {
+            "SKILL.md",
+            "agents/openai.yaml",
+            "references/report-contract.md",
+        }
+        actual = {
+            path.relative_to(SUMMARIZING_EXPERIMENTS_SKILL_ROOT).as_posix()
+            for path in SUMMARIZING_EXPERIMENTS_SKILL_ROOT.rglob("*")
+            if path.is_file()
+        }
+
+        self.assertEqual(actual, expected)
+        self.assertFalse((SUMMARIZING_EXPERIMENTS_SKILL_ROOT / "scripts").exists())
+        self.assertFalse((SUMMARIZING_EXPERIMENTS_SKILL_ROOT / "assets").exists())
+        self.assertFalse((SUMMARIZING_EXPERIMENTS_SKILL_ROOT / "README.md").exists())
+
+    def test_package_is_portable_across_experiment_domains(self) -> None:
+        forbidden = (
+            "/home/",
+            "rheni",
+            "nemotron",
+            "kaggle",
+            "text_cipher",
+            "teacher trace",
+            "sft config",
+        )
+        text_files = [
+            path
+            for path in SUMMARIZING_EXPERIMENTS_SKILL_ROOT.rglob("*")
+            if path.is_file() and path.suffix.lower() in {".md", ".yaml", ".yml"}
+        ]
+        self.assertTrue(text_files, "skillのtext fileが必要です")
+
+        for path in text_files:
+            lowered = path.read_text(encoding="utf-8").lower()
+            for token in forbidden:
+                with self.subTest(path=path, token=token):
+                    self.assertNotIn(token, lowered)
+
+    def test_report_contract_uses_the_compact_five_column_table(self) -> None:
+        body = (
+            SUMMARIZING_EXPERIMENTS_SKILL_ROOT / "references" / "report-contract.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("| 実験 | 親 | 仮説 | 結果 | F1 |", body)
+        self.assertIn("5列", body)
+        self.assertIn("主指標名", body)
+        self.assertIn("絶対値", body)
+        self.assertIn("矢印", body)
+        self.assertIn("個別サマリ", body)
+        self.assertIn("支持", body)
+        self.assertIn("反証", body)
+        self.assertIn("判断保留", body)
+        self.assertIn("未評価", body)
+        self.assertIn("比較可能な最終主指標", body)
+        self.assertIn("判断保留でも主指標cellは`—`", body)
+        self.assertIn("途中logの値", body)
+        self.assertIn(
+            "判断保留。最終結果は確認済みだが親と評価条件が異なり比較不能",
+            body,
+        )
+        self.assertIn(
+            "| 判断保留。最終結果は確認済みだが親と評価条件が異なり比較不能 | — |",
+            body,
+        )
+        self.assertNotIn("判断保留。比較可能な最終成果物が不足", body)
+
+    def test_hypothesis_provenance_must_precede_launch(self) -> None:
+        skill_body = (
+            SUMMARIZING_EXPERIMENTS_SKILL_ROOT / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        contract_body = (
+            SUMMARIZING_EXPERIMENTS_SKILL_ROOT / "references" / "report-contract.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("launch以前", skill_body)
+        self.assertIn("commit、run snapshot、timestamp", skill_body)
+        self.assertIn("記録時点不明", skill_body)
+        self.assertIn("出典と記録時点", contract_body)
+        self.assertIn("`configs/experiments/018.yaml`", contract_body)
+        self.assertIn("commit `a1b2c3d`", contract_body)
+
+    def test_result_status_prioritizes_missing_final_evaluation(self) -> None:
+        skill_body = (
+            SUMMARIZING_EXPERIMENTS_SKILL_ROOT / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        contract_body = (
+            SUMMARIZING_EXPERIMENTS_SKILL_ROOT / "references" / "report-contract.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("最終成果物がなければ`未評価`を優先", skill_body)
+        self.assertIn("結果を確認できるが記録時点不明なら`判断保留`", contract_body)
+        self.assertIn("比較可能な最終値がなければ主指標cellは`—`", contract_body)
+
+    def test_openai_metadata_supports_implicit_invocation(self) -> None:
+        metadata_file = SUMMARIZING_EXPERIMENTS_SKILL_ROOT / "agents" / "openai.yaml"
+        self.assertTrue(metadata_file.is_file(), "agents/openai.yamlが必要です")
+        body = metadata_file.read_text(encoding="utf-8")
+        metadata = yaml.safe_load(body)
+
+        self.assertIn('display_name: "Experiment Summarizer"', body)
+        self.assertRegex(body, r'default_prompt: ".*\$summarizing-experiments.*"')
+        self.assertIs(metadata["policy"]["allow_implicit_invocation"], True)
+        self.assertNotIn("allow_implicit_invocation", metadata["interface"])
+
+    def test_readme_lists_the_skill_and_install_path(self) -> None:
+        readme = (REPOSITORY_ROOT / "README.md").read_text(encoding="utf-8")
+
+        self.assertIn("### `summarizing-experiments`", readme)
+        self.assertIn("--path skills/summarizing-experiments", readme)
 
 
 if __name__ == "__main__":

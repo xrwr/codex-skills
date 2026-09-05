@@ -1,0 +1,6 @@
+interface:
+  display_name: "Experiment Summarizer"
+  short_description: "Summarize experiment hypotheses and results"
+  default_prompt: "Use $summarizing-experiments to summarize this repository experiment and its evidence."
+policy:
+  allow_implicit_invocation: true
