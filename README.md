@@ -22,6 +22,10 @@ Plan, configure, retry, and assess repository experiments with self-contained ex
 
 Run status is reported from evidence that can be traced to the current attempt, not from a queue label or checkpoint alone. The skill separates experiment identity from attempt lineage, so retries retain the experiment ID while old outputs are retired and every new attempt remains auditable.
 
+### `summarizing-experiments`
+
+Compare a repository's recorded experiment hypotheses with artifacts from the current attempt, then organize the evidence into a five-column overview: experiment ID, parent ID, hypothesis, result, and a domain-specific primary metric. Keep supporting details in per-experiment summaries, and never invent a hypothesis after seeing the result.
+
 ### `drawing-model-architecture-diagrams`
 
 Create editable SVG diagrams that explain model architectures as semantic data flows rather than exhaustive layer listings. The skill requires input and output tensor shapes, expands only structure that matters to the explanation, uses symbolic dimensions instead of invented values, and verifies the rendered SVG.
@@ -76,6 +80,22 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
   --path skills/managing-experiments
 ```
 
+### `summarizing-experiments`
+
+Ask Codex to install the skill from this repository:
+
+```text
+Install the summarizing-experiments skill from xrwr/codex-skills.
+```
+
+Or run the bundled installer directly:
+
+```bash
+python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo xrwr/codex-skills \
+  --path skills/summarizing-experiments
+```
+
 ### `drawing-model-architecture-diagrams`
 
 Ask Codex to install the skill from this repository:
@@ -98,7 +118,7 @@ Restart Codex after installation. For reproducible machine setup, keep the repos
 
 ```bash
 uv run python -m unittest -v tests/test_skill_package.py
-for skill in building-viewers building-data-science-projects managing-experiments drawing-model-architecture-diagrams; do
+for skill in building-viewers building-data-science-projects managing-experiments summarizing-experiments drawing-model-architecture-diagrams; do
   uv run python ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py \
     "skills/$skill"
 done
