@@ -1,0 +1,6 @@
+interface:
+  display_name: "Training Pipeline Checker"
+  short_description: "学習前のリーク・入出力・過学習・短期検証を確認し、本学習への移行を判定"
+  default_prompt: "$checking-training-pipelines でこのリポジトリの学習前チェックを順に実行し、本学習へ進めるか証拠付きで判定して。"
+policy:
+  allow_implicit_invocation: true

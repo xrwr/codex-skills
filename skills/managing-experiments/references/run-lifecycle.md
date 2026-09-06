@@ -46,4 +46,21 @@ Job manager、tracking service、framework固有の状態は、それらがrepos
 4. 同じexperiment IDと新attempt/run IDで、空のcanonical outputを使う。
 5. 新artifactのprovenanceと必要artifact contractを再検証する。
 
+## 補助記録の保存先
+
+本実験のoutputツリーには、本実験のcheckpoint・metric・predictionなどだけを置く。学習前チェック、GPU監視の追加ログ、Codexの実行ログ・一時ファイルは、outputツリーの外へ置く。既存の専用場所がなければrepository直下の`.cache/experiment-tools/<experiment>/<attempt>/`を使い、Gitの追跡対象外にする。`outputs/pretrain/debug/`のようにoutput内で分けるだけでは不十分。
+
+補助記録は再確認に必要な最小限にし、既存logやconfigを複製しない。ユーザー向けの最終要約は既存の実験ドキュメントへ保存する。
+
+## Completion Summary
+
+- 実験投入時に、必要な最終評価の完了後にCodexで結果を要約するjobも登録する。要約不要の指定があれば省く。
+- 起動先で`summarizing-experiments`が利用可能なことを確認し、要約方法はそのスキルに任せる。未導入なら長い代替promptを作らず、未設定として報告する。
+- Promptは「実験042の結果をまとめて」程度の一文にする。再実行が複数あり対象が曖昧な場合だけ、既存のrun名や成果物のpathを足す。スキル本文の転記やprompt専用ファイルの作成は不要。
+- Codexの作業directoryを対象repositoryにし、GPUを予約しないgroupへ投入する。Pueueの`--after`は先行jobが成功した場合だけ起動する。失敗時の要約も必要なら終了callback等を使う。
+- Promptは後続jobの`codex exec`へ渡す。`--ephemeral`は使わず、`--json`の出力とstderrをPueueのjobログに残す。別のログファイルへ重複保存しない。
+- 応答の`thread.started`に含まれるセッションIDを要約job IDと一緒に既存の実行記録へ残し、`pueue log <要約job ID>`で応答を追えるようにする。起動前に失敗してIDがなければ、その失敗を記録する。
+- CLIで探す場合は`codex resume --all --include-non-interactive`を使う。通常の一覧では非対話セッションや別directoryのセッションが隠れる。IDが分かれば`codex resume <セッションID>`で開く。
+- 対象attemptと後続job IDを既存の実行記録へ残す。自動処理は結果の要約までとし、個別サマリと全体の系統図・一覧表の更新を確認して完了とする。
+
 依頼なしにrunをstart/stopせず、outputやartifactをdeleteしない。破壊的操作が必要なら対象と影響を示して承認を求める。

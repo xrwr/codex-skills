@@ -18,7 +18,8 @@ description: Use when a repository task explicitly concerns an experiment or run
 5. 入力、split、意味上の変更、必要成果物を特定する。
 6. Config作成・変更では[config architecture](references/config-architecture.md)を読む。experiment configを自己完結したselection manifestにする。
 7. 実行、retry/restart、status/result確認、複数GPUへの割当では[run lifecycle](references/run-lifecycle.md)を読む。experimentとattemptを分離し、資源割当と成果物のprovenanceを検証する。
-8. 変更範囲、確認済み証拠、未解決事項を報告する。依頼のないstart、stop、delete、submitを行わない。
+8. 実験投入時は、[run lifecycle](references/run-lifecycle.md)に従って終了後の要約jobも登録する。補助記録は本実験のoutputツリーの外へ置く。
+9. 変更範囲、確認済み証拠、未解決事項を報告する。依頼のないstart、stop、delete、submitを行わない。
 
 Hydra、pueue、W&B、Lightningなどはrepositoryに既存し、現在利用可能な場合だけ使う。導入や必須化を推測しない。
 
@@ -28,24 +29,6 @@ Hydra、pueue、W&B、Lightningなどはrepositoryに既存し、現在利用可
 |---|---|---|
 | Experiment config・ablation・baseline | 仮説、比較対象、判定条件、保存先、defaults、component所有者、resolved config | `config-architecture.md` |
 | 実行・retry/restart | experiment ID、attempt ID、旧output、実行記録 | `run-lifecycle.md` |
+| 投入後の自動要約 | 最終評価job、対象attempt、成果物、要約保存先、Codex認証、後続job ID | `run-lifecycle.md` |
 | 複数GPUでの実行 | Pueue group、割当GPU、device binding、attempt | `run-lifecycle.md` |
 | Status・result | 必要成果物、current attemptへのprovenance | `run-lifecycle.md` |
-
-## Common Mistakes
-
-- 別experimentをdefaultsで継承する: 必要なcomponent selectionを新configへ展開する。
-- Queueの`Done`やcheckpointだけで完了とする: 必要成果物の契約と帰属を確認する。
-- 同じ仮説のretryへ新experiment IDを振る: experiment IDを維持し、新attemptとして記録する。
-- Pueue group名だけでGPUが割り当てられると考える: groupとGPUの固定対応、`parallel=1`、device bindingを確認する。
-- GPUが複数あるだけでDDPを選ぶ: 明示的な指示がなければ独立した1-GPU jobとして投入する。
-- Tool名から運用を決める: repositoryの既存scriptと状態を先に読む。
-- 事前仮説がない過去runの結果から仮説を後付けする: 欠落として報告する。
-
-## Red Flags
-
-- 「DRYだから」という理由だけでexperiment configを継承する
-- 古いartifactとcurrent runのartifactを同じoutputで混在させる
-- Pueue job ID、group、割当GPUをattempt記録へ残さない
-- 明示的な指示なしにDDP、DataParallel、model shardingを導入する
-- 欠けた証拠を推測で`verified`にする
-- 依頼なしにjobやartifactへ破壊的操作を行う
