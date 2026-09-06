@@ -58,7 +58,7 @@ Job manager、tracking service、framework固有の状態は、それらがrepos
 - 起動先で`summarizing-experiments`が利用可能なことを確認し、要約方法はそのスキルに任せる。未導入なら長い代替promptを作らず、未設定として報告する。
 - Promptは「実験042の結果をまとめて」程度の一文にする。再実行が複数あり対象が曖昧な場合だけ、既存のrun名や成果物のpathを足す。スキル本文の転記やprompt専用ファイルの作成は不要。
 - Codexの作業directoryを対象repositoryにし、GPUを予約しないgroupへ投入する。Pueueの`--after`は先行jobが成功した場合だけ起動する。失敗時の要約も必要なら終了callback等を使う。
-- Promptは後続jobの`codex exec`へ渡す。`--ephemeral`は使わず、`--json`の出力とstderrをPueueのjobログに残す。別のログファイルへ重複保存しない。
+- Promptは後続jobの`codex exec`へ渡す。`--ephemeral`は使わず、`--json`の出力とstderrをPueueのjobログに残す。Pueueはstdinを開いたままにするため、`codex exec ... </dev/null`として追加入力待ちを防ぐ。別のログファイルへ重複保存しない。
 - 応答の`thread.started`に含まれるセッションIDを要約job IDと一緒に既存の実行記録へ残し、`pueue log <要約job ID>`で応答を追えるようにする。起動前に失敗してIDがなければ、その失敗を記録する。
 - CLIで探す場合は`codex resume --all --include-non-interactive`を使う。通常の一覧では非対話セッションや別directoryのセッションが隠れる。IDが分かれば`codex resume <セッションID>`で開く。
 - 対象attemptと後続job IDを既存の実行記録へ残す。自動処理は結果の要約までとし、個別サマリと全体の系統図・一覧表の更新を確認して完了とする。

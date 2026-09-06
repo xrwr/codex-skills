@@ -1,0 +1,6 @@
+interface:
+  display_name: "Automatic Experiments"
+  short_description: "明示した範囲と回数でサマリーから次の実験へ接続し、終了後に新しいセッションへ渡す"
+  default_prompt: "$automating-experiments で、このプロジェクトのサマリーを読み、GPU 0で最大3回、自動実験して。"
+policy:
+  allow_implicit_invocation: false

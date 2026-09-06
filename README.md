@@ -36,6 +36,19 @@ Check leakage, real-data forward/backward, fixed-batch overfitting, and a short 
 
 Use this skill for training correctness; use `managing-experiments` for experiment configuration, attempt history, and resource scheduling.
 
+### `automating-experiments`
+
+Explicitly start a bounded experiment loop. A dedicated Pueue control job opens a fresh Codex session, lets the existing experiment skills select and run one verification, waits for its completion summary, then opens the next session. The default limit is three rounds; failures and stop requests end continuation. This skill has automatic invocation disabled.
+
+In the target repository, ask:
+
+```text
+$automating-experiments で、現在のサマリーから検出器の改善を自動実験して。
+GPU 0を使って最大3回。データ分割は固定し、結果を見て次の検証を選んで。
+```
+
+The skill records the authorized scope, round limit, Pueue job IDs, and session IDs outside experiment outputs. Its `status` and `stop` commands are documented in [the skill](skills/automating-experiments/SKILL.md). Stopping ends future sessions; already-started work continues. The round limit bounds sessions, not elapsed time or GPU hours. The helper requires Python 3.12+, Pueue, an authenticated Codex CLI with `--approve-for-me`, and the installed management and summary skills.
+
 ## Install
 
 ### `building-viewers`
@@ -118,19 +131,31 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
   --path skills/checking-training-pipelines
 ```
 
+### `automating-experiments`
+
+Install `managing-experiments` and `summarizing-experiments` above, then install this skill after publication:
+
+```bash
+python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo xrwr/codex-skills \
+  --path skills/automating-experiments
+```
+
 Restart Codex after installation. For reproducible machine setup, keep the repository URL and a release tag in dotfiles; keep the skill source and reusable assets here.
 
 ## Development
 
 ```bash
-uv run python -m unittest -v tests/test_skill_package.py
-for skill in building-viewers building-data-science-projects managing-experiments summarizing-experiments checking-training-pipelines; do
+uv run python -m unittest -v tests/test_skill_package.py tests/test_experiment_loop.py
+for skill in building-viewers building-data-science-projects managing-experiments summarizing-experiments checking-training-pipelines automating-experiments; do
   uv run python ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py \
     "skills/$skill"
 done
 ```
 
 The package suite checks the skill files, metadata, documented contracts, and viewer scaffolding when this collection is edited. Run it locally before publishing changes; GitHub Actions also runs it on pushes and pull requests. It does not invoke a coding agent or automatically run when a skill is used, and it does not evaluate the quality of agent-generated reports or applications. The loop also runs the official validator against every skill.
+
+The loop tests exercise round limits, failed summaries, stale dependencies, stop requests, and duplicate execution without starting training. They do not measure hypothesis quality.
 
 A separate starter CI job generates the bundled viewer template into a temporary directory and runs its backend/frontend tests, lint, and build. Tests for a viewer adapted to a real project belong to that project.
 

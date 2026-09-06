@@ -46,6 +46,12 @@ class SkillPackageTest(unittest.TestCase):
                     ui.get("policy", {}).get("allow_implicit_invocation", True), bool
                 )
 
+    def test_automation_requires_explicit_invocation(self) -> None:
+        metadata = yaml.safe_load(
+            (REPOSITORY_ROOT / "skills/automating-experiments/agents/openai.yaml").read_text()
+        )
+        self.assertIs(metadata["policy"]["allow_implicit_invocation"], False)
+
     def test_skill_local_links_resolve_within_package(self) -> None:
         for skill in (REPOSITORY_ROOT / "skills").iterdir():
             if not skill.is_dir():
