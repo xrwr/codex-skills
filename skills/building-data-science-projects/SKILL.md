@@ -18,27 +18,3 @@ description: Use when a user asks to create, scaffold, or restructure a Python d
 5. Dependency declaration、lockfile、import、対象testまたは最小entrypointを検証する。導入しただけで利用可能と判断しない。
 
 Experiment config、run、artifact evidenceを扱う場合は、内容を重複させず`managing-experiments`を使う。Viewerを作る場合は`building-viewers`を使う。
-
-## Quick Reference
-
-| 依頼 | 読む参照 | 基本判断 |
-|---|---|---|
-| 新規Python ML project | 両方 | 最小stackとownerのあるdirectoryだけ作る |
-| Library・tool選定 | `python-stack.md` | taskに必要なcategoryだけ選ぶ |
-| Repository再構成 | `project-structure.md` | 現行contractを確認してから境界を変える |
-| 既存projectで通常作業 | 原則不要 | 既存stackをそのまま使う |
-
-## Common Mistakes
-
-- 推奨一覧を全部installする: 今回のentrypointがimportするdependencyだけを追加する。
-- Greenfield向けdefaultを既存repositoryへ強制する: 現在のlockfileと実装を正本にする。
-- Versionをskillへ固定する: projectのdependency declarationとlockfileへ記録する。
-- Hydra、Lightning、W&Bを常に導入する: complexityまたは運用上のconsumerがある場合だけ選ぶ。
-- Data-science projectを名乗るだけで空directoryを量産する: 現在のownerとartifact contractがあるものだけ作る。
-
-## Red Flags
-
-- Userの依頼なしにpackage managerやframeworkを移行する
-- 同じ用途のlibraryを比較せず複数追加する
-- `src`のdomain codeへconfig framework固有objectを渡す
-- Generated data、credential、run outputをsource treeへ混在させる

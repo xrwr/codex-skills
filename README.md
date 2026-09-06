@@ -22,13 +22,19 @@ Plan, configure, retry, and assess repository experiments with self-contained ex
 
 Run status is reported from evidence that can be traced to the current attempt, not from a queue label or checkpoint alone. The skill separates experiment identity from attempt lineage, so retries retain the experiment ID while old outputs are retired and every new attempt remains auditable.
 
+Experiment launches also plan a follow-up Codex summary after the required evaluation jobs finish, with fixed attempt and artifact references. The summary follows `summarizing-experiments` when available and stops at reporting results.
+
 ### `summarizing-experiments`
 
-Compare a repository's recorded experiment hypotheses with artifacts from the current attempt, then organize the evidence into a five-column overview: experiment ID, parent ID, hypothesis, result, and a domain-specific primary metric. Keep supporting details in per-experiment summaries, and never invent a hypothesis after seeing the result.
+Interpret experiment results from their recorded hypotheses and artifacts. Keep the conclusion, findings, and next action easy to scan, with evidence and reproducibility details below. Review related experiments to update the research direction and recommend a grounded next verification, including analysis or a pause when appropriate. Preserve the five-column overview and never invent a launch-time hypothesis after seeing the result.
 
-### `drawing-model-architecture-diagrams`
+By default, update each experiment in `docs/experiments/<id>.md` and maintain the Mermaid lineage and overview table together in `docs/experiments/README.md`. Preserve established report locations.
 
-Create editable SVG diagrams that explain model architectures as semantic data flows rather than exhaustive layer listings. The skill requires input and output tensor shapes, expands only structure that matters to the explanation, uses symbolic dimensions instead of invented values, and verifies the rendered SVG.
+### `checking-training-pipelines`
+
+Check leakage, real-data forward/backward, fixed-batch overfitting, and a short training/validation run with time and step limits. Monitor training speed and GPU state lightly. Keep auxiliary records minimal and outside the experiment output tree.
+
+Use this skill for training correctness; use `managing-experiments` for experiment configuration, attempt history, and resource scheduling.
 
 ## Install
 
@@ -96,20 +102,20 @@ python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github
   --path skills/summarizing-experiments
 ```
 
-### `drawing-model-architecture-diagrams`
+### `checking-training-pipelines`
 
 Ask Codex to install the skill from this repository:
 
 ```text
-Install the drawing-model-architecture-diagrams skill from xrwr/codex-skills.
+Install the checking-training-pipelines skill from xrwr/codex-skills.
 ```
 
-Or run the bundled installer directly:
+Or run the bundled installer directly after the skill is published:
 
 ```bash
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
   --repo xrwr/codex-skills \
-  --path skills/drawing-model-architecture-diagrams
+  --path skills/checking-training-pipelines
 ```
 
 Restart Codex after installation. For reproducible machine setup, keep the repository URL and a release tag in dotfiles; keep the skill source and reusable assets here.
@@ -118,13 +124,15 @@ Restart Codex after installation. For reproducible machine setup, keep the repos
 
 ```bash
 uv run python -m unittest -v tests/test_skill_package.py
-for skill in building-viewers building-data-science-projects managing-experiments summarizing-experiments drawing-model-architecture-diagrams; do
+for skill in building-viewers building-data-science-projects managing-experiments summarizing-experiments checking-training-pipelines; do
   uv run python ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py \
     "skills/$skill"
 done
 ```
 
-The package suite validates repository distribution contracts, renders the viewer starter into a temporary directory, and verifies that the starter refuses to overwrite an existing target. The loop also runs the official validator against every skill.
+The package suite checks the skill files, metadata, documented contracts, and viewer scaffolding when this collection is edited. Run it locally before publishing changes; GitHub Actions also runs it on pushes and pull requests. It does not invoke a coding agent or automatically run when a skill is used, and it does not evaluate the quality of agent-generated reports or applications. The loop also runs the official validator against every skill.
+
+A separate starter CI job generates the bundled viewer template into a temporary directory and runs its backend/frontend tests, lint, and build. Tests for a viewer adapted to a real project belong to that project.
 
 ## License
 

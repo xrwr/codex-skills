@@ -30,33 +30,3 @@ python <skill-dir>/scripts/scaffold_viewer.py viewer \
 ```
 
 生成物は完成品ではない。domain catalogと中央表示を対象データへ置換し、対象リポジトリのdependency管理とrun commandへ統合する。既存targetを上書きしない。
-
-## Quick Reference
-
-| 状況 | 選択 |
-|---|---|
-| 既存React/FastAPIがある | 既存構成へ追加し、starterをコピーしない |
-| Viewer stackがない | starterを展開し、最小縦切りだけ残す |
-| artifactが増え続ける | refresh可能なcatalogとsummary/detail分離 |
-| 一部が壊れている | 全体を止めずitem単位のissueにする |
-| 別PCから見たい | 利用可能な配信能力を確認してから選ぶ |
-
-## Common Mistakes
-
-| 誤りやすい判断 | 修正 |
-|---|---|
-| データ契約より先に3ペインやchartを量産する | 一件の実データをcatalogから主表示まで通す |
-| 既存Viewerにもstarterをコピーする | 既存のrouter、state、theme、testへ適応する |
-| API responseへfilesystem pathや生の例外を返す | opaque IDと安全なissueへ変換する |
-| desktopの3列をmobileで縮小する | 主表示を残しselectorをsheetへ移す |
-| directoryやcheckpointの存在だけでrunをcompleteにする | 必要artifactを検証してstatusを決める |
-| portableならcontainerやTailscaleが必須だと決める | 配信要求と利用可能な能力から最小経路を選ぶ |
-| HTTP 200だけで完成とする | 実ブラウザで内容、操作、consoleを確認する |
-
-## Red Flags
-
-- 実データを一件も表示していない。
-- 不明なjoin keyやartifact schemaを推測している。
-- 既存のdirty workや別画面を壊している。
-- 外部公開なのに認証・TLS・path露出を確認していない。
-- 書き込み機能を依頼なく追加している。

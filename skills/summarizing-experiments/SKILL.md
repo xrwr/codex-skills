@@ -1,44 +1,21 @@
 ---
 name: summarizing-experiments
-description: Use when summarizing, documenting, reporting, or comparing a repository's experiment history or an individual experiment.
+description: Use when summarizing or comparing repository experiments, interpreting their results, or reviewing the research direction and next verification from experiment evidence.
 ---
 
 # Summarizing Experiments
 
 ## Overview
 
-事前記録された仮説とcurrent attemptに帰属する成果物を照合し、事実・解釈・未確認を分けて報告する。実験レポートを作成する前に、[report contract](references/report-contract.md)を必ず全文読む。
+実験の結果から何が分かり、次に何を確かめるかを、根拠に戻れる短いサマリにする。証拠・判定・表示形式は[report contract](references/report-contract.md)に従う。分析の方法や深さは、対象と残る疑問に合わせて選ぶ。
 
 ## Workflow
 
-1. Repositoryの既存docs、config、artifact、metric、predictionと、それらの命名・保存・評価契約を先に調べる。特定framework、path、config schemaを持ち込まない。
-2. 対象experiment、親、current attempt、比較条件を特定する。成果物のrun ID、resolved config、log、timestampなどを照合し、current attemptへ帰属する証拠だけを採用する。
-3. 仮説と判定基準がlaunch以前に記録されたことをcommit、run snapshot、timestampなどで照合する。確認できなければ「記録時点不明」と明記し、事前仮説として扱わず判断保留にする。結果から仮説を後付けしない。
-4. 必要な最終成果物が揃い、評価条件が比較可能か検証する。必要評価またはcurrent attemptの最終成果物がなければ`未評価`を優先する。Queueの`Done`、process exit、checkpointだけで結果をverifiedにしない。
-5. 確認できた数値や条件を事実、そこから導く説明を解釈、証拠不足や矛盾を未確認として分ける。曖昧な場合は断定しない。
-6. Repository全体では5列の一覧、各experimentでは個別サマリを作る。結果短文だけで`支持`、`反証`、`判断保留`、`未評価`の判定が分かるようにする。
-7. 既存の文書構成と表記を優先する。規約がなければ`docs/experiments.md`と`docs/experiments/<id>.md`を提案し、合意なしに標準として強制しない。
+1. 既存の実験記録、config、評価・予測などの成果物を確認し、対象experiment、親、attemptを特定する。指標の解釈より先に、何を検証したい実験か、学習・調整・評価にどのデータを使ったかを調べ、その評価で言える範囲を定める。評価の妥当性が未確認なら、数値の増減から目的上の改善を結論づけない。
+2. 事前仮説と結果を照合する。総合指標だけでは説明できない変化があれば、条件別の差、改善・悪化例、分布などから必要な追加分析を選ぶ。個別例の観察と集計を行き来し、根拠となる成果物やsample IDを残す。
+3. 観察に合う説明を考え、別の原因や反例で区別できるかを検討する。因果を断定せず、不足する観測は不足として残す。
+4. 関連実験の知見と照合し、全体の見立てを更新する。同じ失敗の反復や予想外の結果、方針の節目では、現在の解き方の前提や扱えていない情報まで見直す。必要なら元データやドメイン資料に戻る。
+5. 次の推奨を根拠・予測・判定方法とともに示す。現在の方針を詰める検証と、前提を確かめる検証を考慮し、全体の見立てに照らして選ぶ。追加分析・判断保留・停止も選べる。短期のスコア改善や検証の安さだけで候補を選ばない。
+6. 個別サマリと、全体の見立て・系統図・5列の一覧を更新する。過去の提案を機械的に持ち越さず、今も有効かを確認する。冒頭は短くし、判断に必要な根拠と再現情報を後ろへ置く。
 
-## Quick Reference
-
-| 対象 | 記録するもの | 判定の根拠 |
-|---|---|---|
-| 全体履歴 | 実験、親、仮説、結果、対象に合う主指標 | 比較可能なcurrent attemptの最終成果物 |
-| 個別実験 | 要旨から次の判断までの詳細 | Config、metric、prediction、log |
-| 証拠不足 | 未評価または判断保留と不足物 | 確認できた事実だけ |
-
-## Common Mistakes
-
-- 実行状態を結果として扱う: Repositoryが要求するmetricやpredictionを確認する。
-- 古いattemptの成果物を混ぜる: Provenanceを照合し、帰属不能なら未確認にする。
-- 表へ変更点や注釈を詰め込む: 一覧を5列に保ち、詳細を個別サマリへ移す。
-- 指標値へ親との差分や矢印を書く: 絶対値だけを書く。
-- 事後的な説明を事前仮説として書く: 仮説の欠落をそのまま報告する。
-
-## Red Flags
-
-- 比較するsplit、metric定義、評価条件が一致していない
-- 主指標の出典またはcurrent attemptへの帰属を示せない
-- 事実と解釈が一文に混在している
-- 「改善した」と書いたが、判定基準が事前記録されていない
-- 証拠不足を推測で埋めている
+要約の依頼は、新たな学習・重い再評価・実験投入の許可ではない。依頼範囲の保存済み成果物の分析で不足する場合は、次の行動として記録する。
