@@ -4,6 +4,8 @@
 
 Experiment configを、実行に必要な選択を列挙する自己完結したselection manifestとして扱う。別のexperiment configを継承しない。既存experimentは参照元にしてよいが、新experimentへ必要なselectionを展開する。
 
+同じexperiment内のtrialは、そのselectionと計画内の変更値から構成してよい。trialのたびに新しいexperiment YAMLや全設定の手書きコピーを作らない。各attemptで変更値と解決後の全設定を保存し、再現時はそのsnapshotを使う。experiment間の動的な継承と、同一experiment内のtrial overrideは区別する。
+
 Stable/shared componentへ切り出すのは、次をすべて満たす場合だけにする。
 
 - 対応するconcrete implementationが存在する
@@ -17,6 +19,8 @@ Stable/shared componentへ切り出すのは、次をすべて満たす場合だ
 実行単位の設定を`configs/tasks/{task_name}/`、複数taskで共有する設定部品を`configs/components/`へ分離する。各taskのentry configは`config.yaml`、experiment YAMLは`configs/tasks/{task_name}/experiment/`へ置く。Taskだけが使うgeneratorなどのgroupは、そのtaskの直下へ置く。
 
 通常のExperiment IDには3桁の連番を付け、最初のbaselineは`001_baseline`のように命名する。既存experimentを基準に派生させる場合は、`002_finetune_from_001`のように変更内容と派生元のIDを名前へ含める。名前にはベースexperimentですでに表現されている情報を繰り返さず、意味上の差分だけを短く記述する。`from_001`は比較上の系譜を表すものであり、config inheritanceを許可するものではない。
+
+採番するかは[run lifecycle](run-lifecycle.md)のIdentityで先に判断する。trial番号はexperiment内で管理し、派生元がtrialならそのIDと実際のコード・設定・成果物への参照を記録する。既存IDは振り直さず、trial未対応のrepositoryでは設定・出力先・loggerの対応範囲を確認してから組み込む。スキルの更新だけで実装済みと扱わない。
 
 Config groupは次のownershipと名称にそろえる。これは許可するgroupの語彙であり、該当するconcrete implementationが存在するgroupだけを作成する。空のdirectoryや将来用のgroupは作らない。
 
@@ -88,8 +92,8 @@ experiment_id: 032_focal_from_031
 
 ## Decision Steps
 
-1. 既存experimentのresolved configと各component groupを確認する。
-2. 新experimentに必要なselectionを列挙する。
-3. 所有条件を満たす既存componentを選び、selectionを新configへ明示する。
+1. 基準experiment・trialのコード、resolved config、入力・評価条件と各component groupを確認する。
+2. trial追加なら、計画内の変更値を既存のoverride・探索記録へ保存する。新experimentなら、必要なselectionを列挙する。
+3. 新experimentでは所有条件を満たす既存componentを選び、selectionを新configへ明示する。
 4. 条件を満たさない設定はexperimentまたはtask内に置く。
-5. Entrypointでconfigをresolveし、plain value/objectへ変換してdomain `src`へ渡す。可能ならdomain `src`をHydraなどの設定frameworkから独立させる。
+5. Entrypointでconfigをresolveして全設定を保存し、plain value/objectへ変換してdomain `src`へ渡す。可能ならdomain `src`をHydraなどの設定frameworkから独立させる。

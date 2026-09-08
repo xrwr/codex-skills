@@ -20,15 +20,15 @@ Recommendations are conditional rather than a bulk-install bundle. Exact version
 
 Plan, configure, retry, and assess repository experiments with self-contained experiment configs. Each config declares its component selections directly instead of inheriting from another experiment; shared settings stay with the concrete component, task, or artifact contract that owns them.
 
-Run status is reported from evidence that can be traced to the current attempt, not from a queue label or checkpoint alone. The skill separates experiment identity from attempt lineage, so retries retain the experiment ID while old outputs are retired and every new attempt remains auditable.
+An experiment combines a hypothesis with a bounded validation plan; trials are conditions within that plan, and attempts are executions of those conditions. Search earlier experiments before assigning a new ID. Planned parameter changes stay within the experiment, while retries preserve the trial and fold and keep previous outputs auditable. No theme hierarchy is required. Run status comes from artifacts attributable to the target attempt.
 
-Experiment launches also plan a follow-up Codex summary after the required evaluation jobs finish, with fixed attempt and artifact references. The summary follows `summarizing-experiments` when available and stops at reporting results.
+W&B groups collect CV folds for the same trial; other trials are compared separately, and retry history is excluded from CV aggregation through explicit selection of attempts. A single verification or bounded search batch schedules a follow-up Codex summary after its required evaluations, with fixed trial, attempt, and artifact references. The summary follows `summarizing-experiments` when available and stops at reporting results.
 
 ### `summarizing-experiments`
 
 Interpret experiment results from their recorded hypotheses and artifacts. Keep the conclusion, findings, and next action easy to scan, with evidence and reproducibility details below. Review related experiments to update the research direction and recommend a grounded next verification, including analysis or a pause when appropriate. Preserve the five-column overview and never invent a launch-time hypothesis after seeing the result.
 
-By default, update each experiment in `docs/experiments/<id>.md` and maintain the Mermaid lineage and overview table together in `docs/experiments/README.md`. Preserve established report locations.
+By default, update each experiment in `docs/experiments/<id>.md` and maintain the Mermaid lineage and overview table together in `docs/experiments/README.md`. Keep one overview row per experiment, compare trials inside its summary, and link selected results to the exact trial and attempts. Preserve established report locations.
 
 ### `checking-training-pipelines`
 
@@ -47,7 +47,7 @@ $automating-experiments で、現在のサマリーから検出器の改善を�
 GPU 0を使って最大3回。データ分割は固定し、結果を見て次の検証を選んで。
 ```
 
-The skill records the authorized scope, round limit, Pueue job IDs, and session IDs outside experiment outputs. Its `status` and `stop` commands are documented in [the skill](skills/automating-experiments/SKILL.md). Stopping ends future sessions; already-started work continues. The round limit bounds sessions, not elapsed time or GPU hours. The helper requires Python 3.12+, Pueue, an authenticated Codex CLI with `--approve-for-me`, and the installed management and summary skills.
+The skill records the authorized scope, round limit, Pueue job IDs, and session IDs outside experiment outputs. Its `status` and `stop` commands are documented in [the skill](skills/automating-experiments/SKILL.md). Stopping ends future sessions; already-started work continues. The round limit bounds sessions, not new experiment IDs, elapsed time, or GPU hours. An authorized search batch needs its own enforced trial/time limits. The helper requires Python 3.12+, Pueue, an authenticated Codex CLI with `--approve-for-me`, and the installed management and summary skills.
 
 ## Install
 
