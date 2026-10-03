@@ -175,7 +175,7 @@ class SkillPackageTest(unittest.TestCase):
 
         self.assertTrue(example_rows, "標準表に実験例が必要です")
         result_status_pattern = re.compile(
-            r"\A(?:支持|反証|判断保留|未評価)(?:\Z|[。:：\s])"
+            r"\A(?:評価済み|一部評価|未評価|比較不能)(?:\Z|[。:：\s])"
         )
         for experiment_id, parent_id, hypothesis, result, metric in example_rows:
             with self.subTest(experiment_id=experiment_id):
@@ -186,14 +186,14 @@ class SkillPackageTest(unittest.TestCase):
                 self.assertRegex(
                     result,
                     result_status_pattern,
-                    "結果cellは所定の判定から始める必要があります",
+                    "結果cellは所定の評価状態から始める必要があります",
                 )
                 self.assertRegex(metric, r"\A(?:—|-?\d+(?:\.\d+)?)\Z")
                 self.assertNotRegex(metric, r"(?:->|=>|→|←|Δ|delta|差分)")
 
         self.assertIsNone(
-            result_status_pattern.match("支持されなかった"),
-            "判定語の一部一致を受理してはいけません",
+            result_status_pattern.match("評価済みとは言えない"),
+            "評価状態の一部一致を受理してはいけません",
         )
 
 

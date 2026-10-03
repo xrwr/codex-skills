@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>研究の文章を読み比べる — 9つの見本</title>
+<style>
+:root { color-scheme: light; --paper: #fffefa; --ink: #252d30; --muted: #566468; --line: #dce1dd; --accent: #216553; }
+* { box-sizing: border-box; }
+html { scroll-padding-top: 24px; }
+body { margin: 0; background: #f3f4ef; color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Noto Sans CJK JP", "Yu Gothic", sans-serif; line-height: 1.8; }
+a { color: var(--accent); text-underline-offset: 4px; }
+a:hover { text-decoration-thickness: 2px; }
+a:focus-visible, [tabindex]:focus-visible { outline: 3px solid #c57638; outline-offset: 4px; }
+.skip { position: absolute; left: 16px; top: -80px; background: white; padding: 8px; z-index: 3; }
+.skip:focus { top: 8px; }
+.layout { display: grid; grid-template-columns: 250px minmax(0, 860px); max-width: 1180px; margin: auto; align-items: start; }
+aside { position: sticky; top: 0; padding: 40px 22px; max-height: 100vh; overflow-y: auto; }
+.brand { font-size: 17px; font-weight: 750; margin: 0 0 8px; }
+.aside-note { margin: 0 0 24px; font-size: 12px; color: var(--muted); line-height: 1.7; }
+nav { display: grid; gap: 3px; }
+nav a { padding: 7px 0; font-size: 13px; text-decoration: none; }
+nav a:hover { text-decoration: underline; }
+main { min-width: 0; background: var(--paper); border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+article { padding: 52px 56px 64px; border-bottom: 1px solid var(--line); scroll-margin-top: 0; }
+.eyebrow { margin: 0 0 10px; font-size: 12px; font-weight: 700; letter-spacing: .06em; color: var(--accent); }
+h1 { font-size: clamp(24px, 2.4vw, 31px); line-height: 1.55; margin: 0 0 26px; letter-spacing: .01em; overflow-wrap: anywhere; }
+h2 { font-size: 20px; line-height: 1.6; margin: 36px 0 14px; }
+h3 { font-size: 17px; }
+p { margin: 0 0 20px; font-size: 16px; }
+li { margin: 8px 0; }
+article ul, article ol { padding-left: 1.4em; margin: 16px 0 24px; }
+article li { padding-left: 3px; margin: 12px 0; }
+article li p { margin: 0; }
+article li::marker { color: var(--accent); }
+.page-map { display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px 18px; padding: 14px 0; margin: 28px 0 20px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.page-map span { font-size: 12px; color: var(--muted); }
+.page-map a { font-size: 12px; padding: 2px 0; text-decoration: underline; }
+blockquote { margin: 0 0 28px; padding: 8px 14px; border-left: 3px solid #a9bfb4; color: var(--muted); background: #f3f6f0; }
+blockquote p { font-size: 13px; margin: 0; }
+.table-scroll { overflow-x: auto; max-width: 100%; margin: 24px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 1.7; }
+th, td { text-align: left; border-bottom: 1px solid var(--line); padding: 11px 10px; vertical-align: top; min-width: 64px; }
+th { background: #edf1eb; font-weight: 650; }
+td:first-child, th:first-child { padding-left: 12px; }
+code { font-size: .86em; background: #eef1eb; padding: 2px 4px; border-radius: 3px; overflow-wrap: anywhere; }
+pre { max-width: 100%; overflow-x: auto; padding: 16px; background: #eef1eb; }
+pre code { padding: 0; }
+.back { display: inline-block; margin-top: 16px; font-size: 12px; color: var(--muted); }
+@media (max-width: 780px) {
+  .layout { display: block; }
+  aside { position: static; max-height: none; padding: 24px; }
+  nav { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 16px; }
+  nav a { font-size: 12px; }
+  .aside-note { margin-bottom: 14px; }
+  main { border: 0; }
+  article { padding: 34px 22px 42px; }
+  p { font-size: 15px; }
+  h2 { font-size: 18px; }
+  th, td { padding: 9px 7px; }
+}
+@media print {
+  aside, .skip, .back { display: none; }
+  .layout { display: block; max-width: none; }
+  main { border: none; }
+  article { padding: 0; break-before: page; border: none; }
+  article:first-child { break-before: auto; }
+  body { background: white; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#README">本文へ移動</a>
+<div class="layout">
+<aside>
+<p class="brand">研究の文章を読み比べる</p>
+<p class="aside-note">9つの見本 / 2026-09-21<br>すべて架空の実験・数値です。</p>
+<nav aria-label="文章サンプル"><a href="#README">はじめに</a><a href="#01-report">01　決まった項目順で読む</a><a href="#02-finding">02　発見を見出しで拾う</a><a href="#03-question">03　疑問から答えを探す</a><a href="#04-small-difference">04　差が小さいとき</a><a href="#05-incomplete">05　評価に届かないとき</a><a href="#06-exploration">06　失敗例から問いを作る</a><a href="#07-synthesis">07　複数実験をまとめる</a><a href="#08-method">08　手法を説明する</a><a href="#09-index">09　研究の現在地</a><a href="#scenario">共通設定・架空の数値</a></nav>
+</aside>
+<main><article id="README" aria-labelledby="README-label"><p id="README-label" class="eyebrow">はじめに</p><h1 id="README--研究ドキュメントの文章サンプル">研究ドキュメントの文章サンプル</h1>
+<ul>
+<li><strong>今回の変更</strong>：9本を、見出しと箇条書きで拾い読みできる形に改稿。</li>
+<li><strong>読む順番</strong>：まず01。別の構成を比べたければ02・03へ。</li>
+<li><strong>題材</strong>：架空の製品画像分類。実験・数値・観察はすべて創作。</li>
+<li><strong>比較の前提</strong>：01〜03は同じ結果・条件・制約。文章の構成だけを変えている。</li>
+</ul>
+<p><a href="#01-report">HTMLで読む</a> / <a href="#scenario">共通設定・数値</a></p>
+<nav class="page-map" aria-label="このページの内容"><span>このページ</span><a href="#README--書き方を比べる3本">書き方を比べる3本</a><a href="#README--別の場面を読む">別の場面を読む</a><a href="#README--今回そろえた書き方">今回そろえた書き方</a><a href="#README--感想を返すとき">感想を返すとき</a><a href="#README--ファイルの扱い">ファイルの扱い</a></nav><h2 id="README--書き方を比べる3本">書き方を比べる3本</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="比較表"><table>
+<thead>
+<tr>
+<th>見本</th>
+<th>構成</th>
+<th>読み比べる点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#01-report">01・A</a></td>
+<td>比較条件 → 結果 → 解釈 → 次の作業</td>
+<td>情報の場所を予想しやすいか</td>
+</tr>
+<tr>
+<td><a href="#02-finding">02・B</a></td>
+<td>発見 → 考えられる理由 → 採用判断</td>
+<td>関心のある発見から読めるか</td>
+</tr>
+<tr>
+<td><a href="#03-question">03・C</a></td>
+<td>理由・結果・具体例・未確認を問い別に整理</td>
+<td>疑問の答えへ直接たどれるか</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="README--別の場面を読む">別の場面を読む</h2>
+<ul>
+<li><strong>差が小さい</strong>：<a href="#04-small-difference">04・採用基準未達と効果不明を分ける</a></li>
+<li><strong>実行が失敗した</strong>：<a href="#05-incomplete">05・評価に届かなかったことを記録する</a></li>
+<li><strong>原因を探したい</strong>：<a href="#06-exploration">06・失敗例から次の問いを作る</a></li>
+<li><strong>研究全体をつかみたい</strong>：<a href="#07-synthesis">07・複数実験から現在の方針をまとめる</a></li>
+<li><strong>手法を理解したい</strong>：<a href="#08-method">08・具体例から仕組みを説明する</a></li>
+<li><strong>研究を再開したい</strong>：<a href="#09-index">09・現在地と読む入口をまとめる</a></li>
+</ul>
+<h2 id="README--今回そろえた書き方">今回そろえた書き方</h2>
+<ul>
+<li><strong>冒頭</strong>：目的・結果・判断・限界を短い箇条書きにする。</li>
+<li><strong>見出し</strong>：何を読める場所か、見出しだけで分かる名前にする。</li>
+<li><strong>箇条書き</strong>：一項目に一つの論点。必要なものには先頭ラベルを付ける。</li>
+<li><strong>比較</strong>：数値は表に並べる。重要な制約は結果の近くに残す。</li>
+<li><strong>詳しい情報</strong>：共通設定や関連ページへリンクする。</li>
+</ul>
+<h2 id="README--感想を返すとき">感想を返すとき</h2>
+<ul>
+<li>「01の順番なら読める」「02はまだ一項目が長い」のように、番号と箇所だけでよい。</li>
+<li>最初に目が止まった場所と、読み飛ばした場所が分かると、次の改稿に使いやすい。</li>
+</ul>
+<h2 id="README--ファイルの扱い">ファイルの扱い</h2>
+<ul>
+<li><strong>編集元</strong>：各Markdown。<code>index.html</code>は同じ内容の表示版。</li>
+<li><strong>再生成</strong>：このディレクトリで<code>python3 render.py</code>を実行する。<code>markdown-it-py</code>を使用。</li>
+<li><strong>実験ID</strong>：001〜003は見本内だけの番号。実際の実験登録はしていない。</li>
+<li><strong>根拠</strong>：実データの代わりに、<a href="#scenario">共通設定</a>の該当箇所へリンクする。</li>
+<li><strong>スキル本体</strong>：今回の改稿では変更していない。</li>
+</ul>
+<a class="back" href="#README">見本集の入口へ</a></article>
+<article id="01-report" aria-labelledby="01-report-label"><p id="01-report-label" class="eyebrow">01　決まった項目順で読む</p><h1 id="01-report--入力解像度448を次の基準に採用する">入力解像度：448を次の基準に採用する</h1>
+<blockquote>
+<p>見本01・A：決まった項目順で読む。架空の実験001。</p>
+</blockquote>
+<ul>
+<li><strong>目的</strong>：入力を大きくすると、細かい傷の見逃しが減るか。</li>
+<li><strong>結果</strong>：macro F1は81.6 → 83.4。3 seedすべてで改善した。</li>
+<li><strong>判断</strong>：448入力を採用し、残る誤りを調べる。</li>
+<li><strong>範囲</strong>：開発評価2,000枚での結果。未知の撮影条件での効果は未確認。</li>
+</ul>
+<nav class="page-map" aria-label="このページの内容"><span>このページ</span><a href="#01-report--比較条件">比較条件</a><a href="#01-report--結果">結果</a><a href="#01-report--解釈と限界">解釈と限界</a><a href="#01-report--次にすること">次にすること</a></nav><h2 id="01-report--比較条件">比較条件</h2>
+<ul>
+<li><strong>変更</strong>：入力解像度を224 → 448。</li>
+<li><strong>固定</strong>：モデル構造、学習データ、学習率、epoch数、batch size。</li>
+<li><strong>採用基準</strong>：平均F1が+1.0ポイント以上、推論30ms/枚以下。</li>
+</ul>
+<h2 id="01-report--結果">結果</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="比較表"><table>
+<thead>
+<tr>
+<th>指標</th>
+<th style="text-align:right">224入力</th>
+<th style="text-align:right">448入力</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>macro F1・3 seed平均</td>
+<td style="text-align:right">81.6</td>
+<td style="text-align:right">83.4</td>
+</tr>
+<tr>
+<td>seed別のF1</td>
+<td style="text-align:right">81.4 / 81.8 / 81.6</td>
+<td style="text-align:right">83.4 / 83.6 / 83.2</td>
+</tr>
+<tr>
+<td>細かい傷100枚の正解数・seed 0</td>
+<td style="text-align:right">60</td>
+<td style="text-align:right">78</td>
+</tr>
+<tr>
+<td>推論時間・ms/枚</td>
+<td style="text-align:right">10</td>
+<td style="text-align:right">24</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>改善幅</strong>：seed別で+2.0 / +1.8 / +1.6ポイント。</li>
+<li><strong>速度</strong>：推論は2.4倍の時間を要するが、上限内。同一機器・batch size 16で測定。</li>
+<li><strong>未計測</strong>：学習時間。</li>
+</ul>
+<h2 id="01-report--解釈と限界">解釈と限界</h2>
+<ul>
+<li><strong>観察</strong>：傷100枚では、新たな正解22枚、逆に不正解になったもの4枚。</li>
+<li><strong>手がかり</strong>：新たな正解22枚のうち15枚は、元画像上の傷幅が2〜4画素だった。</li>
+<li><strong>解釈</strong>：解像度を上げて、細い傷の情報を残せた可能性がある。</li>
+<li><strong>限界</strong>：傷の内訳はseed 0のみ。改善の仕組みまでは特定できていない。</li>
+</ul>
+<h2 id="01-report--次にすること">次にすること</h2>
+<ul>
+<li>448でも誤る画像を確認し、細部・撮影条件・分類基準のどこに課題があるかを調べる。</li>
+<li>448より大きい入力での学習は、まだ計画していない。</li>
+</ul>
+<p><a href="#scenario--実験001入力解像度">比較条件の詳細</a> / <a href="#02-finding">見本02へ</a></p>
+<a class="back" href="#README">見本集の入口へ</a></article>
+<article id="02-finding" aria-labelledby="02-finding-label"><p id="02-finding-label" class="eyebrow">02　発見を見出しで拾う</p><h1 id="02-finding--448入力で細かい傷の正解が60枚から78枚に増えた">448入力で、細かい傷の正解が60枚から78枚に増えた</h1>
+<blockquote>
+<p>見本02・B：発見を見出しで拾う。架空の実験001。</p>
+</blockquote>
+<ul>
+<li><strong>発見</strong>：細かい傷100枚のうち、差し引き18枚を新たに正解した。</li>
+<li><strong>全体</strong>：macro F1も3 seed平均で+1.8ポイント改善した。</li>
+<li><strong>判断</strong>：推論時間の上限も満たすため、448入力を次の基準にする。</li>
+<li><strong>範囲</strong>：開発評価での結果。傷の内訳はseed 0だけの観察。</li>
+</ul>
+<nav class="page-map" aria-label="このページの内容"><span>このページ</span><a href="#02-finding--細かい傷にどんな変化があったか">細かい傷に、どんな変化があったか</a><a href="#02-finding--なぜ改善したと考えられるか">なぜ改善したと考えられるか</a><a href="#02-finding--精度と速度は採用条件を満たしたか">精度と速度は、採用条件を満たしたか</a><a href="#02-finding--次に何を調べるか">次に何を調べるか</a></nav><h2 id="02-finding--細かい傷にどんな変化があったか">細かい傷に、どんな変化があったか</h2>
+<ul>
+<li><strong>対象</strong>：予測を見る前に選んだ細かい傷100枚。</li>
+<li><strong>改善</strong>：224では不正解、448では正解になった画像が22枚。</li>
+<li><strong>悪化</strong>：224では正解、448では不正解になった画像が4枚。</li>
+<li><strong>共通点</strong>：改善22枚のうち15枚は、元画像上の傷幅が2〜4画素。</li>
+</ul>
+<h2 id="02-finding--なぜ改善したと考えられるか">なぜ改善したと考えられるか</h2>
+<ul>
+<li><strong>224入力</strong>：幅2〜4画素の傷は、単純な縮尺で0.5〜1画素に相当する。</li>
+<li><strong>448入力</strong>：同じ傷が1〜2画素に相当し、細部を残しやすくなる可能性がある。</li>
+<li><strong>未確定</strong>：見え方は補間やコントラストにも依存するため、改善の原因は断定できない。</li>
+</ul>
+<h2 id="02-finding--精度と速度は採用条件を満たしたか">精度と速度は、採用条件を満たしたか</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="比較表"><table>
+<thead>
+<tr>
+<th>入力</th>
+<th style="text-align:right">macro F1・3 seed平均</th>
+<th style="text-align:right">推論時間</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>224</td>
+<td style="text-align:right">81.6</td>
+<td style="text-align:right">10ms/枚</td>
+</tr>
+<tr>
+<td>448</td>
+<td style="text-align:right">83.4</td>
+<td style="text-align:right">24ms/枚</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>精度</strong>：seed別の差は+2.0 / +1.8 / +1.6。平均+1.0ポイントの採用基準を満たす。</li>
+<li><strong>速度</strong>：上限30ms/枚を満たす。同一機器・batch size 16で測定。</li>
+<li><strong>比較条件</strong>：解像度だけを変更。モデル構造と学習条件は固定。</li>
+</ul>
+<h2 id="02-finding--次に何を調べるか">次に何を調べるか</h2>
+<ul>
+<li><strong>次の分析</strong>：448でも誤る画像を確認し、残る課題を絞る。</li>
+<li><strong>未確認</strong>：別の撮影条件への効果、さらに大きい入力の利得、学習時間。</li>
+<li><strong>評価の位置づけ</strong>：2,000枚の開発評価は方針選択に繰り返し使っている。</li>
+</ul>
+<p><a href="#scenario--実験001入力解像度">比較条件の詳細</a> / <a href="#03-question">見本03へ</a></p>
+<a class="back" href="#README">見本集の入口へ</a></article>
+<article id="03-question" aria-labelledby="03-question-label"><p id="03-question-label" class="eyebrow">03　疑問から答えを探す</p><h1 id="03-question--入力を大きくすると細かい傷を見分けやすくなるか">入力を大きくすると、細かい傷を見分けやすくなるか</h1>
+<blockquote>
+<p>見本03・C：疑問ごとに答えを探す。架空の実験001。</p>
+</blockquote>
+<ul>
+<li><strong>問い</strong>：縮小した入力で、細かい傷が見分けにくくなっていないか。</li>
+<li><strong>答え</strong>：448入力でF1と傷の正解数が改善した。改善の仕組みは未確定。</li>
+<li><strong>次の判断</strong>：448を採用し、そこで残る失敗を読む。</li>
+<li><strong>範囲</strong>：開発評価2,000枚。未知の撮影条件での効果は未確認。</li>
+</ul>
+<nav class="page-map" aria-label="このページの内容"><span>このページ</span><a href="#03-question--なぜ解像度を変えたのか">なぜ解像度を変えたのか</a><a href="#03-question--結果は何回試しても同じ向きだったか">結果は、何回試しても同じ向きだったか</a><a href="#03-question--狙っていた細かい傷にも効いたか">狙っていた細かい傷にも効いたか</a><a href="#03-question--何がまだ分からないか">何がまだ分からないか</a></nav><h2 id="03-question--なぜ解像度を変えたのか">なぜ解像度を変えたのか</h2>
+<ul>
+<li>元画像は896×896。幅2〜4画素の傷は、224へ縮めると0.5〜1画素に相当する。</li>
+<li>448なら1〜2画素に相当し、細部を残せる可能性がある。</li>
+<li>そこで解像度だけを変更し、モデル構造・データ・学習条件をそろえて学習した。</li>
+</ul>
+<h2 id="03-question--結果は何回試しても同じ向きだったか">結果は、何回試しても同じ向きだったか</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="比較表"><table>
+<thead>
+<tr>
+<th>seed</th>
+<th style="text-align:right">224入力</th>
+<th style="text-align:right">448入力</th>
+<th style="text-align:right">F1の差</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td style="text-align:right">81.4</td>
+<td style="text-align:right">83.4</td>
+<td style="text-align:right">+2.0</td>
+</tr>
+<tr>
+<td>1</td>
+<td style="text-align:right">81.8</td>
+<td style="text-align:right">83.6</td>
+<td style="text-align:right">+1.8</td>
+</tr>
+<tr>
+<td>2</td>
+<td style="text-align:right">81.6</td>
+<td style="text-align:right">83.2</td>
+<td style="text-align:right">+1.6</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>精度</strong>：3回とも改善。平均81.6 → 83.4で、事前基準の+1.0ポイント以上を満たす。</li>
+<li><strong>時間</strong>：10 → 24ms/枚。事前上限の30ms/枚以下を満たす。</li>
+<li><strong>測定条件</strong>：時間は同一機器・batch size 16。学習時間は未計測。</li>
+</ul>
+<h2 id="03-question--狙っていた細かい傷にも効いたか">狙っていた細かい傷にも効いたか</h2>
+<ul>
+<li><strong>正解数</strong>：事前に選んだ100枚で60 → 78枚。seed 0同士の比較。</li>
+<li><strong>内訳</strong>：新たな正解22枚、逆に不正解になったもの4枚。</li>
+<li><strong>具体例の傾向</strong>：改善22枚のうち15枚は、元画像上の傷幅が2〜4画素。</li>
+</ul>
+<h2 id="03-question--何がまだ分からないか">何がまだ分からないか</h2>
+<ul>
+<li>傷の改善が全seedで共通するかは、まだ調べていない。</li>
+<li>補間やコントラストも関わるため、改善を画素数だけでは説明しきれない。</li>
+<li>次は448で残る誤りを確認する。さらに大きい入力での学習は未計画。</li>
+</ul>
+<p><a href="#scenario--実験001入力解像度">比較条件の詳細</a> / <a href="#01-report">見本01へ</a></p>
+<a class="back" href="#README">見本集の入口へ</a></article>
+<article id="04-small-difference" aria-labelledby="04-small-difference-label"><p id="04-small-difference-label" class="eyebrow">04　差が小さいとき</p><h1 id="04-small-difference--明るさ拡張採用基準に届く改善はなかった">明るさ拡張：採用基準に届く改善はなかった</h1>
+<blockquote>
+<p>見本04：小さな差の扱い。架空の実験002。</p>
+</blockquote>
+<ul>
+<li><strong>目的</strong>：明るさ拡張を強めると、分類性能が改善するか。</li>
+<li><strong>結果</strong>：平均F1は83.4 → 83.5。丸め前の差は約+0.067ポイント。</li>
+<li><strong>判断</strong>：事前基準の+1.0ポイントに届かず、今回は採用しない。</li>
+<li><strong>未確定</strong>：小さな効果の有無。「効果ゼロ」とは判断できない。</li>
+</ul>
+<nav class="page-map" aria-label="このページの内容"><span>このページ</span><a href="#04-small-difference--比較条件">比較条件</a><a href="#04-small-difference--結果">結果</a><a href="#04-small-difference--どこまで判断できるか">どこまで判断できるか</a><a href="#04-small-difference--次にすること">次にすること</a></nav><h2 id="04-small-difference--比較条件">比較条件</h2>
+<ul>
+<li><strong>基準</strong>：実験001で採用した448入力。</li>
+<li><strong>変更</strong>：学習時の明るさ拡張の強さだけ。</li>
+<li><strong>固定</strong>：データ、モデル、解像度、学習率、epoch数。</li>
+<li><strong>評価</strong>：方針選択用の開発評価2,000枚。</li>
+</ul>
+<h2 id="04-small-difference--結果">結果</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="比較表"><table>
+<thead>
+<tr>
+<th>seed</th>
+<th style="text-align:right">基準448</th>
+<th style="text-align:right">明るさ拡張</th>
+<th style="text-align:right">F1の差</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td style="text-align:right">83.4</td>
+<td style="text-align:right">83.3</td>
+<td style="text-align:right">−0.1</td>
+</tr>
+<tr>
+<td>1</td>
+<td style="text-align:right">83.6</td>
+<td style="text-align:right">83.8</td>
+<td style="text-align:right">+0.2</td>
+</tr>
+<tr>
+<td>2</td>
+<td style="text-align:right">83.2</td>
+<td style="text-align:right">83.3</td>
+<td style="text-align:right">+0.1</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="04-small-difference--どこまで判断できるか">どこまで判断できるか</h2>
+<ul>
+<li><strong>採用基準</strong>：今回の設定は未達。</li>
+<li><strong>効果の有無</strong>：差の符号がそろわず、反復も3 seedだけ。同等性を確かめる設計ではない。</li>
+<li><strong>残る可能性</strong>：照明条件によって改善と悪化が打ち消し合っているかもしれない。</li>
+<li><strong>不足する情報</strong>：照明条件別の集計。</li>
+</ul>
+<h2 id="04-small-difference--次にすること">次にすること</h2>
+<ul>
+<li>次の比較の基準は、既存の448条件に据え置く。</li>
+<li>保存した予測から、照明別の差を調べる。</li>
+<li>追加の学習は、その分析に根拠が出てから検討する。</li>
+</ul>
+<p><a href="#scenario--実験002明るさ拡張">比較条件の詳細</a> / <a href="#07-synthesis">研究全体の見立て</a></p>
+<a class="back" href="#README">見本集の入口へ</a></article>
+<article id="05-incomplete" aria-labelledby="05-incomplete-label"><p id="05-incomplete-label" class="eyebrow">05　評価に届かないとき</p><h1 id="05-incomplete--部分画像の追加メモリ不足で未評価">部分画像の追加：メモリ不足で未評価</h1>
+<blockquote>
+<p>見本05：評価に届かなかった実験。架空の実験003。</p>
+</blockquote>
+<ul>
+<li><strong>目的</strong>：部分画像で細部を補うと、分類が改善するか。</li>
+<li><strong>状態</strong>：最初の学習batchでGPUメモリ不足。評価値は0件。</li>
+<li><strong>判断</strong>：手法の効果は未評価。失敗の原因も未特定。</li>
+<li><strong>次の作業</strong>：メモリ不足の原因を調べる。再試行は未実施。</li>
+</ul>
+<nav class="page-map" aria-label="このページの内容"><span>このページ</span><a href="#05-incomplete--試そうとした構成">試そうとした構成</a><a href="#05-incomplete--実行できた範囲">実行できた範囲</a><a href="#05-incomplete--次に切り分けること">次に切り分けること</a><a href="#05-incomplete--再試行と記録の扱い">再試行と記録の扱い</a></nav><h2 id="05-incomplete--試そうとした構成">試そうとした構成</h2>
+<ul>
+<li><strong>全体画像</strong>：位置関係を読む。</li>
+<li><strong>部分画像</strong>：細かい傷を大きく見せる。</li>
+<li><strong>分類</strong>：それぞれから抽出した特徴を結合する。</li>
+<li><strong>比較対象</strong>：実験001の448入力。</li>
+</ul>
+<h2 id="05-incomplete--実行できた範囲">実行できた範囲</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="比較表"><table>
+<thead>
+<tr>
+<th>確認項目</th>
+<th>状態</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>seed 0の学習</td>
+<td>最初のbatchでメモリ不足</td>
+</tr>
+<tr>
+<td>seed 1・2の学習</td>
+<td>未実行</td>
+</tr>
+<tr>
+<td>分類性能の評価</td>
+<td>0件</td>
+</tr>
+<tr>
+<td>メモリ不足の原因</td>
+<td>未特定</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="05-incomplete--次に切り分けること">次に切り分けること</h2>
+<ul>
+<li><strong>実装</strong>：不要なtensorを保持していないか。</li>
+<li><strong>構成</strong>：想定したモデルがどれだけメモリを使うか。</li>
+<li><strong>環境</strong>：実行時に十分なメモリを利用できていたか。</li>
+</ul>
+<h2 id="05-incomplete--再試行と記録の扱い">再試行と記録の扱い</h2>
+<ul>
+<li><strong>単なる実装不具合</strong>：修正理由を残し、同じ条件で再試行する。</li>
+<li><strong>学習条件の変更が必要</strong>：batch sizeなどの変更が比較に与える影響を確認する。</li>
+<li><strong>実験履歴</strong>：正式に開始した実験003として残す。</li>
+<li><strong>結果の解釈</strong>：今回の停止から、精度や計算効率の優劣は判断しない。</li>
+</ul>
+<p><a href="#scenario--実験003全体画像と部分画像の併用">計画・実行状態の詳細</a> / <a href="#09-index">現在地</a></p>
+<a class="back" href="#README">見本集の入口へ</a></article>
+<article id="06-exploration" aria-labelledby="06-exploration-label"><p id="06-exploration-label" class="eyebrow">06　失敗例から問いを作る</p><h1 id="06-exploration--誤分類120枚細部と分類基準を調べたい">誤分類120枚：細部と分類基準を調べたい</h1>
+<blockquote>
+<p>見本06：失敗例から次の問いを作る。架空の分析。</p>
+</blockquote>
+<ul>
+<li><strong>目的</strong>：448入力でも残る誤りの特徴を知る。</li>
+<li><strong>発見</strong>：小さい対象の見逃しと、傷・汚れの分類に迷う例が見つかった。</li>
+<li><strong>次の分析</strong>：入力の見え方と、ラベル付け基準をそれぞれ確認する。</li>
+<li><strong>限界</strong>：誤分類だけの観察。全体の頻度や改善量は分からない。</li>
+</ul>
+<nav class="page-map" aria-label="このページの内容"><span>このページ</span><a href="#06-exploration--何を見たか">何を見たか</a><a href="#06-exploration--観察の内訳">観察の内訳</a><a href="#06-exploration--次に区別したいこと">次に区別したいこと</a><a href="#06-exploration--どう確かめるか">どう確かめるか</a><a href="#06-exploration--この分析では言えないこと">この分析では言えないこと</a></nav><h2 id="06-exploration--何を見たか">何を見たか</h2>
+<ul>
+<li><strong>対象</strong>：実験001の448・seed 0の誤分類から、120枚を無作為抽出。</li>
+<li><strong>方法</strong>：一人で元画像を確認し、最も当てはまるタグを1枚につき一つ付けた。</li>
+<li><strong>ラベル</strong>：正解ラベルの変更はしていない。</li>
+</ul>
+<h2 id="06-exploration--観察の内訳">観察の内訳</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="比較表"><table>
+<thead>
+<tr>
+<th>観察したこと</th>
+<th style="text-align:right">枚数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>対象が小さいが、元画像では確認できる</td>
+<td style="text-align:right">38</td>
+</tr>
+<tr>
+<td>傷と汚れのどちらに分類するか迷う</td>
+<td style="text-align:right">34</td>
+</tr>
+<tr>
+<td>反射で表面の状態を読み取りにくい</td>
+<td style="text-align:right">27</td>
+</tr>
+<tr>
+<td>その他・整理できない</td>
+<td style="text-align:right">21</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="06-exploration--次に区別したいこと">次に区別したいこと</h2>
+<ul>
+<li><strong>小さい対象38枚</strong>：縮小で見えにくくなったのか、見えていてもモデルが利用できなかったのか。</li>
+<li><strong>分類に迷う34枚</strong>：基準が曖昧なのか、読む側の理解が不足しているのか。</li>
+<li><strong>注意点</strong>：34枚を「誤ラベル確定」と扱う根拠はない。</li>
+</ul>
+<h2 id="06-exploration--どう確かめるか">どう確かめるか</h2>
+<ul>
+<li>元画像と448入力を並べ、成功例にも同じ特徴があるか調べる。</li>
+<li>分類に迷った画像を既存のラベル付け基準と照合する。</li>
+<li>必要なら、別の人にも同じ基準で判定してもらう。</li>
+</ul>
+<h2 id="06-exploration--この分析では言えないこと">この分析では言えないこと</h2>
+<ul>
+<li>各特徴の誤分類率。今回は成功例を抽出していない。</li>
+<li>他のseedでも同じ傾向があるか。</li>
+<li>各問題を直したときの改善量。</li>
+</ul>
+<p><a href="#scenario--分析メモ残る誤り">観察対象・集計の詳細</a> / <a href="#07-synthesis">全体の見立て</a></p>
+<a class="back" href="#README">見本集の入口へ</a></article>
+<article id="07-synthesis" aria-labelledby="07-synthesis-label"><p id="07-synthesis-label" class="eyebrow">07　複数実験をまとめる</p><h1 id="07-synthesis--現在の方針448を維持し残る誤りを調べる">現在の方針：448を維持し、残る誤りを調べる</h1>
+<blockquote>
+<p>見本07：複数実験の総括。すべて架空の記録。</p>
+</blockquote>
+<ul>
+<li><strong>採用済み</strong>：448入力。開発F1は平均+1.8ポイント改善した。</li>
+<li><strong>採用しない</strong>：強い明るさ拡張。事前基準に届く差がなかった。</li>
+<li><strong>答えがない</strong>：部分画像の追加。学習が止まり、精度は未評価。</li>
+<li><strong>次の焦点</strong>：入力の細部と、傷・汚れの分類基準。</li>
+</ul>
+<nav class="page-map" aria-label="このページの内容"><span>このページ</span><a href="#07-synthesis--方針を変えた根拠">方針を変えた根拠</a><a href="#07-synthesis--比較ごとの結論">比較ごとの結論</a><a href="#07-synthesis--次の分析とその判断への使い方">次の分析と、その判断への使い方</a><a href="#07-synthesis--判断の限界">判断の限界</a></nav><h2 id="07-synthesis--方針を変えた根拠">方針を変えた根拠</h2>
+<ul>
+<li><strong>解像度の比較</strong>：224 → 448で3 seedとも改善。<a href="#02-finding">実験001</a></li>
+<li><strong>細かい傷</strong>：seed 0の100枚では正解60 → 78枚。</li>
+<li><strong>残る誤り</strong>：目視120枚に、小さい対象38枚、分類に迷う例34枚。<a href="#06-exploration">分析</a></li>
+<li><strong>現在の解釈</strong>：細部を残す方向には根拠がある。残る失敗は、見え方と分類基準を分けて調べたい。</li>
+</ul>
+<h2 id="07-synthesis--比較ごとの結論">比較ごとの結論</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="比較表"><table>
+<thead>
+<tr>
+<th>比較・分析</th>
+<th>分かったこと</th>
+<th>未確認</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>224 → 448</td>
+<td>開発F1平均+1.8ポイント。採用</td>
+<td>未知の撮影条件での効果</td>
+</tr>
+<tr>
+<td>明るさ拡張</td>
+<td>平均差約+0.067ポイント。採用基準未達</td>
+<td>小さな効果・照明別の効果</td>
+</tr>
+<tr>
+<td>部分画像の追加</td>
+<td>メモリ不足で停止</td>
+<td>精度への効果全体</td>
+</tr>
+<tr>
+<td>誤分類の目視</td>
+<td>細部と分類基準を調べる理由ができた</td>
+<td>全体での頻度・改善余地</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="07-synthesis--次の分析とその判断への使い方">次の分析と、その判断への使い方</h2>
+<ul>
+<li><strong>成功例と失敗例を並べる</strong>：小さな対象が、入力への縮小で見分けにくくなるか確認する。</li>
+<li><strong>縮小で見えにくくなる場合</strong>：部分画像を使う根拠になる。</li>
+<li><strong>入力でも十分見える場合</strong>：モデルが情報を利用できない理由など、別の説明を考える。</li>
+<li><strong>分類に迷う画像</strong>：ラベル付け基準と照合する。34枚をそのまま修正対象にはしない。</li>
+</ul>
+<h2 id="07-synthesis--判断の限界">判断の限界</h2>
+<ul>
+<li>開発評価を繰り返し使った見立て。独立した最終評価は未実施。</li>
+<li>細かい傷と残る失敗の観察はseed 0だけ。</li>
+<li>部分画像モデルの実装調査は進められるが、改善量はまだ見積もれない。</li>
+</ul>
+<p><a href="#09-index">記録への入口</a> / <a href="#scenario">共通設定</a></p>
+<a class="back" href="#README">見本集の入口へ</a></article>
+<article id="08-method" aria-labelledby="08-method-label"><p id="08-method-label" class="eyebrow">08　手法を説明する</p><h1 id="08-method--高解像度入力縮小で見えにくくなる細部を残す">高解像度入力：縮小で見えにくくなる細部を残す</h1>
+<blockquote>
+<p>見本08：手法を説明する。架空のプロジェクト。</p>
+</blockquote>
+<ul>
+<li><strong>目的</strong>：細い傷の見逃しを減らす。</li>
+<li><strong>変更点</strong>：入力画像を224×224 → 448×448にする。</li>
+<li><strong>仕組み</strong>：細部を表す画素を多く残した状態で、モデルを学習する。</li>
+<li><strong>現在の根拠</strong>：開発F1は平均+1.8ポイント。推論時間は2.4倍。</li>
+</ul>
+<nav class="page-map" aria-label="このページの内容"><span>このページ</span><a href="#08-method--具体例幅4画素の傷はどうなるか">具体例：幅4画素の傷はどうなるか</a><a href="#08-method--処理どこを変えるか">処理：どこを変えるか</a><a href="#08-method--前提どんな問題に使うか">前提：どんな問題に使うか</a><a href="#08-method--実測この例では何が分かったか">実測：この例では何が分かったか</a><a href="#08-method--設定と関連資料">設定と関連資料</a></nav><h2 id="08-method--具体例幅4画素の傷はどうなるか">具体例：幅4画素の傷はどうなるか</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="比較表"><table>
+<thead>
+<tr>
+<th>段階</th>
+<th>画像サイズ</th>
+<th>傷の幅の目安</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>元画像</td>
+<td>896×896</td>
+<td>4画素</td>
+</tr>
+<tr>
+<td>従来の入力</td>
+<td>224×224</td>
+<td>1画素</td>
+</tr>
+<tr>
+<td>現在の入力</td>
+<td>448×448</td>
+<td>2画素</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>期待する変化</strong>：傷を表す画素が増え、背景と見分けやすくなる可能性がある。</li>
+<li><strong>表の意味</strong>：単純な縮尺の目安。実際の見え方は補間・向き・コントラストにも依存する。</li>
+</ul>
+<h2 id="08-method--処理どこを変えるか">処理：どこを変えるか</h2>
+<ol>
+<li>元画像を読み込む。</li>
+<li>モデルへ渡す前に、448×448へリサイズする。</li>
+<li>448入力でモデルを学習し直す。</li>
+<li>同じ448入力で評価する。</li>
+</ol>
+<ul>
+<li><strong>比較で固定するもの</strong>：モデル構造、学習データ、学習率など。</li>
+<li><strong>コスト</strong>：画素数は4倍。実行時間やメモリの倍率は、機器・実装ごとに測る。</li>
+</ul>
+<h2 id="08-method--前提どんな問題に使うか">前提：どんな問題に使うか</h2>
+<ul>
+<li><strong>必要な条件</strong>：分類に使える細部が、元画像に写っている。</li>
+<li><strong>別の対応が必要な例</strong>：反射で傷が見えない画像、分類基準が曖昧な画像。</li>
+<li><strong>検証すべきこと</strong>：細部を残した入力を、モデルが分類に利用できるか。</li>
+</ul>
+<h2 id="08-method--実測この例では何が分かったか">実測：この例では何が分かったか</h2>
+<ul>
+<li><strong>全体</strong>：macro F1は3 seed平均81.6 → 83.4。<a href="#02-finding">実験001</a></li>
+<li><strong>細かい傷</strong>：seed 0の100枚では正解60 → 78枚。</li>
+<li><strong>推論時間</strong>：10 → 24ms/枚。同一機器・batch size 16。</li>
+<li><strong>未確認</strong>：学習時間、448より大きい入力の利得、別の撮影条件への効果。</li>
+</ul>
+<h2 id="08-method--設定と関連資料">設定と関連資料</h2>
+<ul>
+<li><strong>設定箇所</strong>：前処理の入力サイズ。</li>
+<li><strong>実装への参照</strong>：この見本には実装ファイルがない。実際の文書ではconfigとリサイズ処理をリンクする。</li>
+<li><strong>次の分析</strong>：<a href="#06-exploration">448でも残る失敗</a></li>
+</ul>
+<p><a href="#scenario--実験001入力解像度">比較条件の詳細</a></p>
+<a class="back" href="#README">見本集の入口へ</a></article>
+<article id="09-index" aria-labelledby="09-index-label"><p id="09-index-label" class="eyebrow">09　研究の現在地</p><h1 id="09-index--製品表面の分類研究の現在地">製品表面の分類：研究の現在地</h1>
+<blockquote>
+<p>見本09：久しぶりに開くときの入口。架空のプロジェクト。</p>
+</blockquote>
+<ul>
+<li><strong>課題</strong>：細かい傷の見逃しを減らす。</li>
+<li><strong>現在の基準</strong>：448入力、macro F1 83.4、推論24ms/枚。</li>
+<li><strong>分かったこと</strong>：高解像度化は改善。明るさ拡張は採用基準未達。</li>
+<li><strong>次にすること</strong>：残る誤りの見え方と、ラベル付け基準を調べる。</li>
+</ul>
+<nav class="page-map" aria-label="このページの内容"><span>このページ</span><a href="#09-index--読みたい内容から選ぶ">読みたい内容から選ぶ</a><a href="#09-index--実験一覧">実験一覧</a><a href="#09-index--数値の読み方">数値の読み方</a><a href="#09-index--次の作業">次の作業</a></nav><h2 id="09-index--読みたい内容から選ぶ">読みたい内容から選ぶ</h2>
+<ul>
+<li><strong>全体の方針</strong>：<a href="#07-synthesis">複数実験から分かったこと</a></li>
+<li><strong>手法の仕組み</strong>：<a href="#08-method">高解像度入力の説明</a></li>
+<li><strong>次の問いの根拠</strong>：<a href="#06-exploration">誤分類120枚の分析</a></li>
+<li><strong>個別の結果</strong>：下の実験一覧から各ページへ。</li>
+</ul>
+<h2 id="09-index--実験一覧">実験一覧</h2>
+<ul>
+<li><strong>系譜</strong>：001で選んだ448条件から、002と003へ分岐。</li>
+<li><strong>未完了</strong>：003はメモリ不足で停止。精度はまだ比較できていない。</li>
+</ul>
+<div class="table-scroll" tabindex="0" role="region" aria-label="比較表"><table>
+<thead>
+<tr>
+<th>実験</th>
+<th>親</th>
+<th>仮説</th>
+<th>結果</th>
+<th style="text-align:right">macro F1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#02-finding">001</a></td>
+<td>—</td>
+<td>高解像度化で平均+1.0ポイント以上改善</td>
+<td>支持。+1.8ポイント、時間条件も達成</td>
+<td style="text-align:right">83.4</td>
+</tr>
+<tr>
+<td><a href="#04-small-difference">002</a></td>
+<td>001</td>
+<td>明るさ拡張で平均+1.0ポイント以上改善</td>
+<td>反証。採用基準未達。小さな効果は不明</td>
+<td style="text-align:right">83.5</td>
+</tr>
+<tr>
+<td><a href="#05-incomplete">003</a></td>
+<td>001</td>
+<td>部分画像で細部を補い、分類を改善</td>
+<td>未評価。メモリ不足で停止</td>
+<td style="text-align:right">—</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="09-index--数値の読み方">数値の読み方</h2>
+<ul>
+<li><strong>F1</strong>：3 seed平均。方針選択用の開発評価2,000枚。</li>
+<li><strong>時間</strong>：同一機器・batch size 16で測定。</li>
+<li><strong>未確認</strong>：独立した最終評価での性能。</li>
+</ul>
+<h2 id="09-index--次の作業">次の作業</h2>
+<ul>
+<li>小さな対象の成功例と失敗例を並べ、縮小で見分けにくくなっていないか確認する。</li>
+<li>傷と汚れの分類に迷う画像を、ラベル付け基準と照合する。</li>
+<li>追加学習・ラベル変更は未実施。上記は次の作業案。</li>
+</ul>
+<p><a href="#README">見本集へ戻る</a> / <a href="#scenario">共通設定</a></p>
+<a class="back" href="#README">見本集の入口へ</a></article>
+<article id="scenario" aria-labelledby="scenario-label"><p id="scenario-label" class="eyebrow">共通設定・架空の数値</p><h1 id="scenario--共通設定製品表面の不良分類">共通設定：製品表面の不良分類</h1>
+<p>このページを含め、見本集の実験・数値・観察はすべて架空です。実測結果や実在するデータセットを示すものではありません。文章間で前提と数値をそろえるための設定資料です。</p>
+<nav class="page-map" aria-label="このページの内容"><span>このページ</span><a href="#scenario--共通条件">共通条件</a><a href="#scenario--実験001入力解像度">実験001：入力解像度</a><a href="#scenario--実験002明るさ拡張">実験002：明るさ拡張</a><a href="#scenario--実験003全体画像と部分画像の併用">実験003：全体画像と部分画像の併用</a><a href="#scenario--分析メモ残る誤り">分析メモ：残る誤り</a><a href="#scenario--文書の関係">文書の関係</a></nav><h2 id="scenario--共通条件">共通条件</h2>
+<p>製品の写真を「正常・傷・汚れ・欠け」の4クラスに分類する。元画像は896×896。製品個体をまたぐ重複を避けて学習用と開発評価用を分け、開発評価は2,000枚に固定する。これは実験方針を選ぶために繰り返し使う評価であり、最終的な未知データへの性能を保証する評価ではない。</p>
+<p>主指標はmacro F1。表では百分率で表し、差はポイントで示す。各条件をseed 0・1・2で学習し、その3回の平均を比較する。共通設定は固定したモデル構造、学習データ、optimizer、学習率、30 epoch、batch size 16、最終epochのcheckpoint。入力解像度に依存しない分類ヘッドを使う。</p>
+<p>これらは事前に記録されたという設定。実際のconfig・manifest・ログは存在しない。</p>
+<h2 id="scenario--実験001入力解像度">実験001：入力解像度</h2>
+<p>仮説は、224から448へ入力解像度を上げると細かい傷を区別しやすくなり、開発評価のmacro F1が平均1.0ポイント以上上がること。入力解像度だけを変更する。次の比較の基準には、平均1.0ポイント以上の改善と、推論30ms/枚以下を満たす場合に採用する計画。</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="比較表"><table>
+<thead>
+<tr>
+<th>seed</th>
+<th style="text-align:right">224</th>
+<th style="text-align:right">448</th>
+<th style="text-align:right">差</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td style="text-align:right">81.4</td>
+<td style="text-align:right">83.4</td>
+<td style="text-align:right">+2.0</td>
+</tr>
+<tr>
+<td>1</td>
+<td style="text-align:right">81.8</td>
+<td style="text-align:right">83.6</td>
+<td style="text-align:right">+1.8</td>
+</tr>
+<tr>
+<td>2</td>
+<td style="text-align:right">81.6</td>
+<td style="text-align:right">83.2</td>
+<td style="text-align:right">+1.6</td>
+</tr>
+<tr>
+<td>平均</td>
+<td style="text-align:right">81.6</td>
+<td style="text-align:right">83.4</td>
+<td style="text-align:right">+1.8</td>
+</tr>
+</tbody>
+</table></div>
+<p>同一機器・batch size 16での推論時間は、処理枚数で割った平均が224で10ms/枚、448で24ms/枚。学習時間は計測していない。推論時間はこの測定条件だけの値。</p>
+<p>細かい傷100枚はモデルの予測を見る前に選んだ固定の観察対象。seed 0同士の比較で、正しく傷と分類した枚数は60枚から78枚へ増えた。新たに正解した22枚、逆に不正解になった4枚、正解を維持した56枚、両方で不正解だった18枚。代表例を確認すると新たな正解22枚のうち15枚で、傷幅は元画像上の2〜4画素だった。残り7枚は幅広い傷など。細かい傷の改善は全seedで確認していない。</p>
+<p>画素数の幾何学的な目安は、元画像で幅2〜4画素の傷が、224入力では0.5〜1画素、448入力では1〜2画素。リサイズ後の見え方は補間・コントラスト・向きにも依存し、幅だけから情報の消失を断定できない。</p>
+<h2 id="scenario--実験002明るさ拡張">実験002：明るさ拡張</h2>
+<p>実験001の448条件を基準に、学習時の明るさ拡張だけを強める。平均1.0ポイント以上の改善を次の基準への採用条件として事前に定めた。解像度、データ、学習条件は同じ。</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="比較表"><table>
+<thead>
+<tr>
+<th>seed</th>
+<th style="text-align:right">基準448</th>
+<th style="text-align:right">明るさ拡張</th>
+<th style="text-align:right">差</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td style="text-align:right">83.4</td>
+<td style="text-align:right">83.3</td>
+<td style="text-align:right">−0.1</td>
+</tr>
+<tr>
+<td>1</td>
+<td style="text-align:right">83.6</td>
+<td style="text-align:right">83.8</td>
+<td style="text-align:right">+0.2</td>
+</tr>
+<tr>
+<td>2</td>
+<td style="text-align:right">83.2</td>
+<td style="text-align:right">83.3</td>
+<td style="text-align:right">+0.1</td>
+</tr>
+<tr>
+<td>平均（小数1桁）</td>
+<td style="text-align:right">83.4</td>
+<td style="text-align:right">83.5</td>
+<td style="text-align:right">+0.1</td>
+</tr>
+</tbody>
+</table></div>
+<p>平均差の丸め前は約+0.067ポイント。差の符号はそろわず、同等性検証や十分な反復数の設計はしていない。事前に定めた採用基準は未達。小さな効果の有無・照明条件別の効果は判断できない。</p>
+<h2 id="scenario--実験003全体画像と部分画像の併用">実験003：全体画像と部分画像の併用</h2>
+<p>部分画像で細かい傷を残し、全体画像で位置関係を保つという仮説。実験001の448条件との比較を事前に計画し、番号を付けて開始した。</p>
+<p>実装は全体画像と部分画像を別々に特徴抽出し、特徴を結合して分類する。seed 0の最初の学習batchでGPUメモリ不足により停止。分類性能の評価には一度も到達していない。seed 1・2は未実行。</p>
+<p>不明なことは、実装の不要なtensor保持などの不具合か、想定した構成のメモリ需要か、利用可能メモリの問題か。メモリ不足だけで手法の計算効率や精度を比較しない。正式な実験開始後の失敗なので、実験003として履歴を保持する。再試行は提案のみで、実行していない。</p>
+<h2 id="scenario--分析メモ残る誤り">分析メモ：残る誤り</h2>
+<p>実験001の448・seed 0の誤分類から120枚を無作為抽出して目視確認した。同じseed 0の確認なので、独立した再検証ではない。以下は相互排他的な区分として一人で付けた暫定タグ。正解ラベルを書き換えてはいない。</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="比較表"><table>
+<thead>
+<tr>
+<th>観察タグ</th>
+<th style="text-align:right">枚数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>対象が小さいが、元画像では確認できる</td>
+<td style="text-align:right">38</td>
+</tr>
+<tr>
+<td>傷と汚れのどちらにするか、分類基準が曖昧</td>
+<td style="text-align:right">34</td>
+</tr>
+<tr>
+<td>反射で表面の状態が読み取りにくい</td>
+<td style="text-align:right">27</td>
+</tr>
+<tr>
+<td>上記に当てはまらない、または原因を整理できない</td>
+<td style="text-align:right">21</td>
+</tr>
+<tr>
+<td>合計</td>
+<td style="text-align:right">120</td>
+</tr>
+</tbody>
+</table></div>
+<p>誤分類だけを抽出しており、全体での各タグの頻度や誤分類率は分からない。34枚は「ラベル誤り確定」ではない。見直しによる精度改善量は予測できない。</p>
+<h2 id="scenario--文書の関係">文書の関係</h2>
+<p>01〜03は実験001の同じ情報を異なる文章にする。04は実験002、05は実験003、06は分析メモ。07と09はそれらの総括、08は実験001の手法説明。</p>
+<p>実験の系譜は001から002と003へ分岐する。002・003は001の448条件を基準にする。06は001の誤分類を読む分析であり、独立した学習実験として採番しない。</p>
+<a class="back" href="#README">見本集の入口へ</a></article></main>
+</div>
+</body>
+</html>
