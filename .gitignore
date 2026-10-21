@@ -6,3 +6,6 @@ __pycache__/
 node_modules/
 dist/
 .DS_Store
+
+# ホストローカルの通知コードへの互換リンクは配布しない。
+/skills/managing-experiments/scripts/experiment_notifications

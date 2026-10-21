@@ -2,6 +2,8 @@
 
 ## Core Contract
 
+新experimentや未承認の計画変更では、[設定作成前の仮説確認](planning-and-approval.md#設定作成前の仮説確認)を先に行う。ユーザーから仮説を受け取るか、提示した仮説案への承認を得るまで、新規config・overrideや実験用コードを作成・変更しない。具体的な仮説・計画がすでに指定・承認されている場合は、その範囲で以下へ進む。
+
 Experiment configには、実行に必要なcomponentの選択を明示する。既存experimentを参考に、新experimentのconfigへ必要なselectionを展開する。
 
 設定形式と配置は既存entrypointの契約にそろえる。YAMLで管理するrepositoryではexperiment configもYAMLで作成する。既存規約がなければYAMLを案として提示する。ユーザーが形式を指定した場合はその指定に従う。
@@ -96,9 +98,9 @@ experiment_id: 032_focal_from_031
 
 ## Decision Steps
 
-1. 基準experiment・trialのコード、resolved config、入力・評価条件と各component groupを確認する。
+1. 基準experiment・trialのコード、resolved config、入力・評価条件と各component groupを読み取り調査し、仮説・比較計画がユーザーから指定・承認されていることを確認してから設定作成へ進む。
 2. trial追加なら、計画内の変更値を既存のoverride・探索記録へ保存する。新experimentなら、必要なselectionを列挙する。
 3. 新experimentでは所有条件を満たす既存componentを選び、selectionを新configへ明示する。
 4. 条件を満たさない設定はexperimentまたはtask内に置く。
 5. Entrypointでconfigをresolveして全設定を保存し、plain value/objectへ変換してdomain `src`へ渡す。可能ならdomain `src`をHydraなどの設定frameworkから独立させる。
-6. 承認前の静的検証では一時領域へresolve結果を保存する。DefaultsとCLI overrideを含む解決後の設定を基準と比較し、差分が計画した変更点と一致すること、および出力先を確認して実験案へ添える。
+6. 仮説確認後・実行前の静的検証では一時領域へresolve結果を保存する。DefaultsとCLI overrideを含む解決後の設定を基準と比較し、差分が承認された計画の変更点と一致すること、および出力先を確認する。実行範囲の追加承認が必要なら、この検証結果を実験案へ添える。
